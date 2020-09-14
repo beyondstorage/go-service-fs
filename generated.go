@@ -27,10 +27,22 @@ var _ httpclient.Options
 const Type = "fs"
 
 // Service available pairs.
-const ()
+const (
+	// EnableLinkFollow will // EnableLinkFollow
+	PairEnableLinkFollow = "fs_enable_link_follow"
+)
 
 // Service available infos.
 const ()
+
+// WithEnableLinkFollow will apply enable_link_follow value to Options
+// This pair is used to // EnableLinkFollow
+func WithEnableLinkFollow(v bool) *types.Pair {
+	return &types.Pair{
+		Key:   PairEnableLinkFollow,
+		Value: v,
+	}
+}
 
 // pairStorageNewMap holds all available pairs
 var pairStorageNewMap = map[string]struct{}{
@@ -162,8 +174,9 @@ func parsePairStorageDelete(opts []*types.Pair) (*pairStorageDelete, error) {
 var pairStorageListDirMap = map[string]struct{}{
 	// Required pairs
 	// Optional pairs
-	ps.DirFunc:  struct{}{},
-	ps.FileFunc: struct{}{},
+	ps.DirFunc:           struct{}{},
+	PairEnableLinkFollow: struct{}{},
+	ps.FileFunc:          struct{}{},
 	// Generated pairs
 }
 
@@ -173,10 +186,12 @@ type pairStorageListDir struct {
 
 	// Required pairs
 	// Optional pairs
-	HasDirFunc  bool
-	DirFunc     types.ObjectFunc
-	HasFileFunc bool
-	FileFunc    types.ObjectFunc
+	HasDirFunc          bool
+	DirFunc             types.ObjectFunc
+	HasEnableLinkFollow bool
+	EnableLinkFollow    bool
+	HasFileFunc         bool
+	FileFunc            types.ObjectFunc
 	// Generated pairs
 }
 
@@ -202,6 +217,11 @@ func parsePairStorageListDir(opts []*types.Pair) (*pairStorageListDir, error) {
 	if ok {
 		result.HasDirFunc = true
 		result.DirFunc = v.(types.ObjectFunc)
+	}
+	v, ok = values[PairEnableLinkFollow]
+	if ok {
+		result.HasEnableLinkFollow = true
+		result.EnableLinkFollow = v.(bool)
 	}
 	v, ok = values[ps.FileFunc]
 	if ok {

@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -390,13 +391,15 @@ func TestStorage_ListDir(t *testing.T) {
 	}
 
 	tests := []struct {
-		name  string
-		fi    []os.FileInfo
-		items []*types.Object
-		err   error
+		name             string
+		enableFollowLink bool
+		fi               []os.FileInfo
+		items            []*types.Object
+		err              error
 	}{
 		{
 			"success file",
+			false,
 			[]os.FileInfo{
 				fileInfo{
 					name:    "test_file",
@@ -420,6 +423,7 @@ func TestStorage_ListDir(t *testing.T) {
 		},
 		{
 			"success file recursively",
+			false,
 			[]os.FileInfo{
 				fileInfo{
 					name:    "test_file",
@@ -443,6 +447,7 @@ func TestStorage_ListDir(t *testing.T) {
 		},
 		{
 			"success dir",
+			false,
 			[]os.FileInfo{
 				fileInfo{
 					name:    "test_dir",
@@ -465,6 +470,7 @@ func TestStorage_ListDir(t *testing.T) {
 		},
 		{
 			"success dir recursively",
+			false,
 			[]os.FileInfo{
 				fileInfo{
 					name:    "test_dir",
@@ -487,6 +493,7 @@ func TestStorage_ListDir(t *testing.T) {
 		},
 		{
 			"success file under windows",
+			false,
 			[]os.FileInfo{
 				fileInfo{
 					name:    "test_file",
@@ -510,14 +517,67 @@ func TestStorage_ListDir(t *testing.T) {
 			nil,
 		},
 		{
+			"skip link",
+			false,
+			[]os.FileInfo{
+				fileInfo{
+					name:    "test_link",
+					size:    0,
+					mode:    os.ModeSymlink,
+					modTime: time.Unix(1, 0),
+				},
+			},
+			[]*types.Object{},
+			nil,
+		},
+		{
+			"follow link",
+			true,
+			[]os.FileInfo{
+				fileInfo{
+					name:    "test_link",
+					size:    1234,
+					mode:    os.ModeSymlink,
+					modTime: time.Unix(1, 0),
+				},
+			},
+			[]*types.Object{
+				{
+					ID: filepath.Join(paths[6], "test_link"),
+					// Make sure ListDir return a name with slash.
+					Name:      fmt.Sprintf("%s/%s", paths[6], "test_link"),
+					Type:      types.ObjectTypeFile,
+					Size:      1234,
+					UpdatedAt: time.Unix(1, 0),
+					ObjectMeta: info.NewObjectMeta().
+						SetContentType("application/octet-stream"),
+				},
+			},
+			nil,
+		},
+		{
 			"os error",
+			false,
 			nil,
 			[]*types.Object{},
 			&os.PathError{Op: "readdir", Path: "", Err: errors.New("readdir fail")},
 		},
 	}
 
+	monkey.Patch(filepath.EvalSymlinks, func(s string) (string, error) {
+		return s, nil
+	})
+	defer monkey.UnpatchAll()
+
 	for k, v := range tests {
+		monkey.Patch(os.Stat, func(s string) (os.FileInfo, error) {
+			for _, o := range v.fi {
+				if strings.HasSuffix(s, o.Name()) {
+					return o, nil
+				}
+			}
+			return nil, os.ErrNotExist
+		})
 		t.Run(v.name, func(t *testing.T) {
 			client := &Storage{
 				ioutilReadDir: func(dirname string) (infos []os.FileInfo, e error) {
@@ -532,7 +592,7 @@ func TestStorage_ListDir(t *testing.T) {
 				items = append(items, object)
 			}), pairs.WithFileFunc(func(object *types.Object) {
 				items = append(items, object)
-			}))
+			}), WithEnableLinkFollow(v.enableFollowLink))
 			assert.Equal(t, v.err == nil, err == nil)
 			assert.EqualValues(t, v.items, items)
 		})

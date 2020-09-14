@@ -36,17 +36,27 @@ func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListD
 	}
 
 	for _, v := range fi {
+		// if v is a link, and client not follow link, skip it
+		if v.Mode()&os.ModeSymlink != 0 && !opt.EnableLinkFollow {
+			continue
+		}
+
+		target, err := checkLink(v, rp)
+		if err != nil {
+			return err
+		}
+
 		o := &types.Object{
 			// Always keep service original name as ID.
 			ID: filepath.Join(rp, v.Name()),
 			// Object's name should always be separated by slash (/)
 			Name:       path.Join(dir, v.Name()),
-			Size:       v.Size(),
-			UpdatedAt:  v.ModTime(),
+			Size:       target.Size(),
+			UpdatedAt:  target.ModTime(),
 			ObjectMeta: info.NewObjectMeta(),
 		}
 
-		if v.IsDir() {
+		if target.IsDir() {
 			o.Type = types.ObjectTypeDir
 			if opt.HasDirFunc {
 				opt.DirFunc(o)
@@ -54,7 +64,7 @@ func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListD
 			continue
 		}
 
-		if v := mime.DetectFilePath(v.Name()); v != "" {
+		if v := mime.DetectFilePath(target.Name()); v != "" {
 			o.SetContentType(v)
 		}
 
@@ -231,4 +241,18 @@ func (s *Storage) move(ctx context.Context, src string, dst string, opt *pairSto
 		return err
 	}
 	return
+}
+
+func checkLink(v os.FileInfo, dir string) (os.FileInfo, error) {
+	// if v is not link, return directly
+	if v.Mode()&os.ModeSymlink == 0 {
+		return v, nil
+	}
+
+	// otherwise, follow the link to get the target
+	tarPath, err := filepath.EvalSymlinks(filepath.Join(dir, v.Name()))
+	if err != nil {
+		return nil, err
+	}
+	return os.Stat(tarPath)
 }
