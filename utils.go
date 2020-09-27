@@ -7,9 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/aos-dev/go-storage/v2"
 	"github.com/aos-dev/go-storage/v2/services"
-	"github.com/aos-dev/go-storage/v2/types"
+	typ "github.com/aos-dev/go-storage/v2/types"
 )
 
 // StreamModeType is the stream mode type.
@@ -38,12 +37,12 @@ func (s *Storage) String() string {
 }
 
 // NewStorager will create Storager only.
-func NewStorager(pairs ...*types.Pair) (storage.Storager, error) {
+func NewStorager(pairs ...*typ.Pair) (typ.Storager, error) {
 	return newStorager(pairs...)
 }
 
 // newStorager will create a fs client.
-func newStorager(pairs ...*types.Pair) (store *Storage, err error) {
+func newStorager(pairs ...*typ.Pair) (store *Storage, err error) {
 	defer func() {
 		if err != nil {
 			err = &services.InitError{Op: services.OpNewStorager, Type: Type, Err: err, Pairs: pairs}

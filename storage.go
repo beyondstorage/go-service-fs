@@ -10,8 +10,7 @@ import (
 	"github.com/qingstor/go-mime"
 
 	"github.com/aos-dev/go-storage/v2/pkg/iowrap"
-	"github.com/aos-dev/go-storage/v2/types"
-	"github.com/aos-dev/go-storage/v2/types/info"
+	typ "github.com/aos-dev/go-storage/v2/types"
 )
 
 func (s *Storage) delete(ctx context.Context, path string, opt *pairStorageDelete) (err error) {
@@ -24,105 +23,108 @@ func (s *Storage) delete(ctx context.Context, path string, opt *pairStorageDelet
 	return nil
 }
 
-func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListDir) (err error) {
+func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListDir) (oi *typ.ObjectIterator, err error) {
 	// Always keep service original name as rp.
 	rp := s.getAbsPath(dir)
 	// Then convert the dir to slash separator.
 	dir = filepath.ToSlash(dir)
 
-	fi, err := s.ioutilReadDir(rp)
-	if err != nil {
-		return err
-	}
-
-	for _, v := range fi {
-		// if v is a link, and client not follow link, skip it
-		if v.Mode()&os.ModeSymlink != 0 && !opt.EnableLinkFollow {
-			continue
-		}
-
-		target, err := checkLink(v, rp)
+	fn := typ.NextObjectFunc(func(page *typ.ObjectPage) error {
+		fi, err := s.ioutilReadDir(rp)
 		if err != nil {
 			return err
 		}
 
-		o := &types.Object{
-			// Always keep service original name as ID.
-			ID: filepath.Join(rp, v.Name()),
-			// Object's name should always be separated by slash (/)
-			Name:       path.Join(dir, v.Name()),
-			Size:       target.Size(),
-			UpdatedAt:  target.ModTime(),
-			ObjectMeta: info.NewObjectMeta(),
-		}
-
-		if target.IsDir() {
-			o.Type = types.ObjectTypeDir
-			if opt.HasDirFunc {
-				opt.DirFunc(o)
+		for _, v := range fi {
+			// if v is a link, and client not follow link, skip it
+			if v.Mode()&os.ModeSymlink != 0 && !opt.EnableLinkFollow {
+				continue
 			}
-			continue
+
+			target, err := checkLink(v, rp)
+			if err != nil {
+				return err
+			}
+
+			o := &typ.Object{
+				// Always keep service original name as ID.
+				ID: filepath.Join(rp, v.Name()),
+				// Object's name should always be separated by slash (/)
+				Name:       path.Join(dir, v.Name()),
+				ObjectMeta: typ.NewObjectMeta(),
+			}
+
+			if target.IsDir() {
+				o.Type = typ.ObjectTypeDir
+				page.Data = append(page.Data, o)
+				continue
+			}
+
+			o.SetSize(target.Size())
+			o.SetUpdatedAt(target.ModTime())
+
+			if v := mime.DetectFilePath(target.Name()); v != "" {
+				o.SetContentType(v)
+			}
+
+			o.Type = typ.ObjectTypeFile
+			page.Data = append(page.Data, o)
 		}
 
-		if v := mime.DetectFilePath(target.Name()); v != "" {
-			o.SetContentType(v)
-		}
-
-		o.Type = types.ObjectTypeFile
-		if opt.HasFileFunc {
-			opt.FileFunc(o)
-		}
-	}
-	return
+		return typ.IterateDone
+	})
+	return typ.NewObjectIterator(fn), nil
 }
 
-func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta info.StorageMeta, err error) {
-	meta = info.NewStorageMeta()
+func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta typ.StorageMeta, err error) {
+	meta = typ.NewStorageMeta()
 	meta.WorkDir = s.workDir
 	return meta, nil
 }
 
-func (s *Storage) read(ctx context.Context, path string, opt *pairStorageRead) (rc io.ReadCloser, err error) {
+func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairStorageRead) (err error) {
+	var rc io.ReadCloser
 	// If path is "-", return stdin directly.
 	if path == "-" {
-		f := os.Stdin
-		if opt.HasSize {
-			return iowrap.LimitReadCloser(f, opt.Size), nil
-		}
-		return f, nil
-	}
+		rc = os.Stdin
+	} else {
+		rp := s.getAbsPath(path)
 
-	rp := s.getAbsPath(path)
-
-	f, err := s.osOpen(rp)
-	if err != nil {
-		return nil, err
-	}
-	if opt.HasOffset {
-		_, err = f.Seek(opt.Offset, 0)
+		f, err := s.osOpen(rp)
 		if err != nil {
-			return nil, err
+			return err
 		}
+		if opt.HasOffset {
+			_, err = f.Seek(opt.Offset, 0)
+			if err != nil {
+				return err
+			}
+		}
+
+		rc = f
 	}
 
-	rc = f
 	if opt.HasSize {
 		rc = iowrap.LimitReadCloser(rc, opt.Size)
 	}
 	if opt.HasReadCallbackFunc {
 		rc = iowrap.CallbackReadCloser(rc, opt.ReadCallbackFunc)
 	}
-	return rc, nil
+
+	_, err = io.Copy(w, rc)
+	if err != nil {
+		return
+	}
+	return nil
 }
 
-func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (o *types.Object, err error) {
+func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (o *typ.Object, err error) {
 	if path == "-" {
-		return &types.Object{
+		return &typ.Object{
 			ID:         "-",
 			Name:       "-",
-			Type:       types.ObjectTypeStream,
-			Size:       0,
-			ObjectMeta: info.NewObjectMeta(),
+			Type:       typ.ObjectTypeStream,
+			ObjectMeta: typ.NewObjectMeta(),
 		}, nil
 	}
 
@@ -133,32 +135,34 @@ func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (
 		return nil, err
 	}
 
-	o = &types.Object{
+	o = &typ.Object{
 		ID:         rp,
 		Name:       path,
-		Size:       fi.Size(),
-		UpdatedAt:  fi.ModTime(),
-		ObjectMeta: info.NewObjectMeta(),
+		ObjectMeta: typ.NewObjectMeta(),
 	}
 
 	if fi.IsDir() {
-		o.Type = types.ObjectTypeDir
+		o.Type = typ.ObjectTypeDir
 		return
 	}
+
 	if fi.Mode().IsRegular() {
+		o.SetSize(fi.Size())
+		o.SetUpdatedAt(fi.ModTime())
+
 		if v := mime.DetectFilePath(path); v != "" {
 			o.SetContentType(v)
 		}
 
-		o.Type = types.ObjectTypeFile
+		o.Type = typ.ObjectTypeFile
 		return
 	}
 	if fi.Mode()&StreamModeType != 0 {
-		o.Type = types.ObjectTypeStream
+		o.Type = typ.ObjectTypeStream
 		return
 	}
 
-	o.Type = types.ObjectTypeInvalid
+	o.Type = typ.ObjectTypeInvalid
 	return o, nil
 }
 

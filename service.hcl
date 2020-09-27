@@ -8,10 +8,10 @@ namespace "storage" {
   }
 
   op "list_dir" {
-    optional = ["dir_func", "enable_link_follow", "file_func"]
+    optional = ["enable_link_follow"]
   }
   op "read" {
-    optional = ["offset", "size"]
+    optional = ["offset", "read_callback_func", "size"]
   }
   op "write" {
     optional = ["size"]
@@ -19,6 +19,7 @@ namespace "storage" {
 }
 
 pairs {
+
   pair "enable_link_follow" {
     type = "bool"
   }
