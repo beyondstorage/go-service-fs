@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -13,13 +14,12 @@ import (
 	"time"
 
 	"bou.ke/monkey"
-	"github.com/aos-dev/go-storage/v2/types/info"
+	"github.com/aos-dev/go-storage/v2/pairs"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/aos-dev/go-storage/v2/types"
-	"github.com/aos-dev/go-storage/v2/types/pairs"
+	typ "github.com/aos-dev/go-storage/v2/types"
 )
 
 func TestStorage_String(t *testing.T) {
@@ -83,7 +83,7 @@ func TestStorage_Stat(t *testing.T) {
 		err  error
 		file fileInfo
 
-		object *types.Object
+		object *typ.Object
 	}{
 		{
 			"regular file",
@@ -94,14 +94,14 @@ func TestStorage_Stat(t *testing.T) {
 				mode:    0777,
 				modTime: nowTime,
 			},
-			&types.Object{
-				ID:        "regular file",
-				Name:      "regular file",
-				Type:      types.ObjectTypeFile,
-				Size:      1234,
-				UpdatedAt: nowTime,
-				ObjectMeta: info.NewObjectMeta().
-					SetContentType("application/octet-stream"),
+			&typ.Object{
+				ID:   "regular file",
+				Name: "regular file",
+				Type: typ.ObjectTypeFile,
+				ObjectMeta: typ.NewObjectMeta().
+					SetContentType("application/octet-stream").
+					SetSize(1234).
+					SetUpdatedAt(nowTime),
 			},
 		},
 		{
@@ -113,12 +113,11 @@ func TestStorage_Stat(t *testing.T) {
 				mode:    os.ModeDir | 0777,
 				modTime: nowTime,
 			},
-			&types.Object{
+			&typ.Object{
 				ID:         "dir",
 				Name:       "dir",
-				Type:       types.ObjectTypeDir,
-				UpdatedAt:  nowTime,
-				ObjectMeta: info.NewObjectMeta(),
+				Type:       typ.ObjectTypeDir,
+				ObjectMeta: typ.NewObjectMeta(),
 			},
 		},
 		{
@@ -130,23 +129,22 @@ func TestStorage_Stat(t *testing.T) {
 				mode:    os.ModeDevice | 0777,
 				modTime: nowTime,
 			},
-			&types.Object{
+			&typ.Object{
 				ID:         "stream",
 				Name:       "stream",
-				Type:       types.ObjectTypeStream,
-				UpdatedAt:  nowTime,
-				ObjectMeta: info.NewObjectMeta(),
+				Type:       typ.ObjectTypeStream,
+				ObjectMeta: typ.NewObjectMeta(),
 			},
 		},
 		{
 			"-",
 			nil,
 			fileInfo{},
-			&types.Object{
+			&typ.Object{
 				ID:         "-",
 				Name:       "-",
-				Type:       types.ObjectTypeStream,
-				ObjectMeta: info.NewObjectMeta(),
+				Type:       typ.ObjectTypeStream,
+				ObjectMeta: typ.NewObjectMeta(),
 			},
 		},
 		{
@@ -158,12 +156,11 @@ func TestStorage_Stat(t *testing.T) {
 				mode:    os.ModeIrregular | 0777,
 				modTime: nowTime,
 			},
-			&types.Object{
+			&typ.Object{
 				ID:         "invalid",
 				Name:       "invalid",
-				Type:       types.ObjectTypeInvalid,
-				UpdatedAt:  nowTime,
-				ObjectMeta: info.NewObjectMeta(),
+				Type:       typ.ObjectTypeInvalid,
+				ObjectMeta: typ.NewObjectMeta(),
 			},
 		},
 		{
@@ -394,7 +391,7 @@ func TestStorage_ListDir(t *testing.T) {
 		name             string
 		enableFollowLink bool
 		fi               []os.FileInfo
-		items            []*types.Object
+		items            []*typ.Object
 		err              error
 	}{
 		{
@@ -408,15 +405,15 @@ func TestStorage_ListDir(t *testing.T) {
 					modTime: time.Unix(1, 0),
 				},
 			},
-			[]*types.Object{
+			[]*typ.Object{
 				{
-					ID:        filepath.Join(paths[0], "test_file"),
-					Name:      path.Join(paths[0], "test_file"),
-					Type:      types.ObjectTypeFile,
-					Size:      1234,
-					UpdatedAt: time.Unix(1, 0),
-					ObjectMeta: info.NewObjectMeta().
-						SetContentType("application/octet-stream"),
+					ID:   filepath.Join(paths[0], "test_file"),
+					Name: path.Join(paths[0], "test_file"),
+					Type: typ.ObjectTypeFile,
+					ObjectMeta: typ.NewObjectMeta().
+						SetContentType("application/octet-stream").
+						SetSize(1234).
+						SetUpdatedAt(time.Unix(1, 0)),
 				},
 			},
 			nil,
@@ -432,15 +429,15 @@ func TestStorage_ListDir(t *testing.T) {
 					modTime: time.Unix(1, 0),
 				},
 			},
-			[]*types.Object{
+			[]*typ.Object{
 				{
-					ID:        filepath.Join(paths[1], "test_file"),
-					Name:      path.Join(paths[1], "test_file"),
-					Type:      types.ObjectTypeFile,
-					Size:      1234,
-					UpdatedAt: time.Unix(1, 0),
-					ObjectMeta: info.NewObjectMeta().
-						SetContentType("application/octet-stream"),
+					ID:   filepath.Join(paths[1], "test_file"),
+					Name: path.Join(paths[1], "test_file"),
+					Type: typ.ObjectTypeFile,
+					ObjectMeta: typ.NewObjectMeta().
+						SetContentType("application/octet-stream").
+						SetSize(1234).
+						SetUpdatedAt(time.Unix(1, 0)),
 				},
 			},
 			nil,
@@ -456,14 +453,12 @@ func TestStorage_ListDir(t *testing.T) {
 					modTime: time.Unix(1, 0),
 				},
 			},
-			[]*types.Object{
+			[]*typ.Object{
 				{
 					ID:         filepath.Join(paths[2], "test_dir"),
 					Name:       path.Join(paths[2], "test_dir"),
-					Type:       types.ObjectTypeDir,
-					Size:       0,
-					UpdatedAt:  time.Unix(1, 0),
-					ObjectMeta: info.NewObjectMeta(),
+					Type:       typ.ObjectTypeDir,
+					ObjectMeta: typ.NewObjectMeta(),
 				},
 			},
 			nil,
@@ -479,14 +474,12 @@ func TestStorage_ListDir(t *testing.T) {
 					modTime: time.Unix(1, 0),
 				},
 			},
-			[]*types.Object{
+			[]*typ.Object{
 				{
 					ID:         filepath.Join(paths[3], "test_dir"),
 					Name:       path.Join(paths[3], "test_dir"),
-					Type:       types.ObjectTypeDir,
-					Size:       0,
-					UpdatedAt:  time.Unix(1, 0),
-					ObjectMeta: info.NewObjectMeta(),
+					Type:       typ.ObjectTypeDir,
+					ObjectMeta: typ.NewObjectMeta(),
 				},
 			},
 			nil,
@@ -502,16 +495,16 @@ func TestStorage_ListDir(t *testing.T) {
 					modTime: time.Unix(1, 0),
 				},
 			},
-			[]*types.Object{
+			[]*typ.Object{
 				{
 					ID: filepath.Join(paths[4], "test_file"),
 					// Make sure ListDir return a name with slash.
-					Name:      fmt.Sprintf("%s/%s", paths[4], "test_file"),
-					Type:      types.ObjectTypeFile,
-					Size:      1234,
-					UpdatedAt: time.Unix(1, 0),
-					ObjectMeta: info.NewObjectMeta().
-						SetContentType("application/octet-stream"),
+					Name: fmt.Sprintf("%s/%s", paths[4], "test_file"),
+					Type: typ.ObjectTypeFile,
+					ObjectMeta: typ.NewObjectMeta().
+						SetContentType("application/octet-stream").
+						SetSize(1234).
+						SetUpdatedAt(time.Unix(1, 0)),
 				},
 			},
 			nil,
@@ -527,7 +520,7 @@ func TestStorage_ListDir(t *testing.T) {
 					modTime: time.Unix(1, 0),
 				},
 			},
-			[]*types.Object{},
+			[]*typ.Object{},
 			nil,
 		},
 		{
@@ -541,16 +534,16 @@ func TestStorage_ListDir(t *testing.T) {
 					modTime: time.Unix(1, 0),
 				},
 			},
-			[]*types.Object{
+			[]*typ.Object{
 				{
 					ID: filepath.Join(paths[6], "test_link"),
 					// Make sure ListDir return a name with slash.
-					Name:      fmt.Sprintf("%s/%s", paths[6], "test_link"),
-					Type:      types.ObjectTypeFile,
-					Size:      1234,
-					UpdatedAt: time.Unix(1, 0),
-					ObjectMeta: info.NewObjectMeta().
-						SetContentType("application/octet-stream"),
+					Name: fmt.Sprintf("%s/%s", paths[6], "test_link"),
+					Type: typ.ObjectTypeFile,
+					ObjectMeta: typ.NewObjectMeta().
+						SetContentType("application/octet-stream").
+						SetSize(1234).
+						SetUpdatedAt(time.Unix(1, 0)),
 				},
 			},
 			nil,
@@ -559,7 +552,7 @@ func TestStorage_ListDir(t *testing.T) {
 			"os error",
 			false,
 			nil,
-			[]*types.Object{},
+			[]*typ.Object{},
 			&os.PathError{Op: "readdir", Path: "", Err: errors.New("readdir fail")},
 		},
 	}
@@ -586,14 +579,25 @@ func TestStorage_ListDir(t *testing.T) {
 				},
 			}
 
-			items := make([]*types.Object, 0)
+			items := make([]*typ.Object, 0)
 
-			err := client.ListDir(paths[k], pairs.WithDirFunc(func(object *types.Object) {
-				items = append(items, object)
-			}), pairs.WithFileFunc(func(object *types.Object) {
-				items = append(items, object)
-			}), WithEnableLinkFollow(v.enableFollowLink))
-			assert.Equal(t, v.err == nil, err == nil)
+			it, err := client.ListDir(paths[k], WithEnableLinkFollow(v.enableFollowLink))
+			if err != nil {
+				t.Error(err)
+			}
+
+			for {
+				o, err := it.Next()
+				if err == typ.IterateDone {
+					break
+				}
+				assert.Equal(t, v.err == nil, err == nil)
+				if err != nil {
+					break
+				}
+
+				items = append(items, o)
+			}
 			assert.EqualValues(t, v.items, items)
 		})
 	}
@@ -603,7 +607,7 @@ func TestStorage_Read(t *testing.T) {
 	tests := []struct {
 		name    string
 		path    string
-		pairs   []*types.Pair
+		pairs   []*typ.Pair
 		isNil   bool
 		openErr error
 		seekErr error
@@ -635,7 +639,7 @@ func TestStorage_Read(t *testing.T) {
 		{
 			"stdin with size",
 			"-",
-			[]*types.Pair{
+			[]*typ.Pair{
 				pairs.WithSize(100),
 			},
 			false,
@@ -645,7 +649,7 @@ func TestStorage_Read(t *testing.T) {
 		{
 			"success with size",
 			"test_success",
-			[]*types.Pair{
+			[]*typ.Pair{
 				pairs.WithSize(100),
 			},
 			false,
@@ -655,7 +659,7 @@ func TestStorage_Read(t *testing.T) {
 		{
 			"success with offset",
 			"test_success",
-			[]*types.Pair{
+			[]*typ.Pair{
 				pairs.WithOffset(10),
 			},
 			false,
@@ -665,7 +669,7 @@ func TestStorage_Read(t *testing.T) {
 		{
 			"error with offset",
 			"test_success",
-			[]*types.Pair{
+			[]*typ.Pair{
 				pairs.WithOffset(10),
 			},
 			true,
@@ -675,7 +679,7 @@ func TestStorage_Read(t *testing.T) {
 		{
 			"success with and size offset",
 			"test_success",
-			[]*types.Pair{
+			[]*typ.Pair{
 				pairs.WithSize(100),
 				pairs.WithOffset(10),
 			},
@@ -694,6 +698,11 @@ func TestStorage_Read(t *testing.T) {
 				assert.Equal(t, 0, whence)
 				return 0, v.seekErr
 			})
+			monkey.PatchInstanceMethod(reflect.TypeOf(fakeFile), "Read", func(f *os.File, b []byte) (n int, err error) {
+				t.Logf("Read has been called.")
+				b = append(b, []byte("xxxx")...)
+				return 4, io.EOF
+			})
 
 			client := Storage{
 				osOpen: func(name string) (file *os.File, e error) {
@@ -702,9 +711,9 @@ func TestStorage_Read(t *testing.T) {
 				},
 			}
 
-			o, err := client.Read(v.path, v.pairs...)
+			var buf bytes.Buffer
+			err := client.Read(v.path, &buf, v.pairs...)
 			assert.Equal(t, v.openErr == nil && v.seekErr == nil, err == nil)
-			assert.Equal(t, v.isNil, o == nil)
 		})
 	}
 }
@@ -793,7 +802,7 @@ func TestStorage_Write(t *testing.T) {
 				},
 			}
 
-			var pair []*types.Pair
+			var pair []*typ.Pair
 			if v.ioCopyN != nil {
 				pair = append(pair, pairs.WithSize(1234))
 			}
