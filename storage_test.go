@@ -712,8 +712,9 @@ func TestStorage_Read(t *testing.T) {
 			}
 
 			var buf bytes.Buffer
-			err := client.Read(v.path, &buf, v.pairs...)
+			n, err := client.Read(v.path, &buf, v.pairs...)
 			assert.Equal(t, v.openErr == nil && v.seekErr == nil, err == nil)
+			assert.Equal(t, int64(buf.Len()), n)
 		})
 	}
 }
@@ -730,6 +731,7 @@ func TestStorage_Write(t *testing.T) {
 		ioCopyN      func(dst io.Writer, src io.Reader, n int64) (written int64, err error)
 		ioCopyBuffer func(dst io.Writer, src io.Reader, buf []byte) (written int64, err error)
 		hasErr       bool
+		written      int64
 	}{
 		{
 			"failed os create",
@@ -744,6 +746,7 @@ func TestStorage_Write(t *testing.T) {
 			nil,
 			nil,
 			true,
+			0,
 		},
 		{
 			"failed io copyn",
@@ -756,6 +759,7 @@ func TestStorage_Write(t *testing.T) {
 			},
 			nil,
 			true,
+			0,
 		},
 		{
 			"failed io copy buffer",
@@ -765,6 +769,7 @@ func TestStorage_Write(t *testing.T) {
 				return 0, io.EOF
 			},
 			true,
+			0,
 		},
 		{
 			"success with size",
@@ -774,20 +779,22 @@ func TestStorage_Write(t *testing.T) {
 			},
 			func(dst io.Writer, src io.Reader, n int64) (written int64, err error) {
 				assert.Equal(t, int64(1234), n)
-				return 0, nil
+				return n, nil
 			},
 			nil,
 			false,
+			1234,
 		},
 		{
 			"success with stdout",
 			nil,
 			func(dst io.Writer, src io.Reader, n int64) (written int64, err error) {
 				assert.Equal(t, int64(1234), n)
-				return 0, nil
+				return n, nil
 			},
 			nil,
 			false,
+			1234,
 		},
 	}
 
@@ -808,12 +815,14 @@ func TestStorage_Write(t *testing.T) {
 			}
 
 			var err error
+			var n int64
 			if v.osCreate == nil {
-				err = client.Write("-", nil, pair...)
+				n, err = client.Write("-", nil, pair...)
 			} else {
-				err = client.Write(paths[k], nil, pair...)
+				n, err = client.Write(paths[k], nil, pair...)
 			}
 			assert.Equal(t, v.hasErr, err != nil)
+			assert.Equal(t, v.written, n)
 		})
 	}
 }
