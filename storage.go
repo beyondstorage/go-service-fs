@@ -82,7 +82,7 @@ func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta 
 	return meta, nil
 }
 
-func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairStorageRead) (err error) {
+func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairStorageRead) (n int64, err error) {
 	var rc io.ReadCloser
 	// If path is "-", return stdin directly.
 	if path == "-" {
@@ -92,12 +92,12 @@ func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairS
 
 		f, err := s.osOpen(rp)
 		if err != nil {
-			return err
+			return n, err
 		}
 		if opt.HasOffset {
 			_, err = f.Seek(opt.Offset, 0)
 			if err != nil {
-				return err
+				return n, err
 			}
 		}
 
@@ -111,11 +111,7 @@ func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairS
 		rc = iowrap.CallbackReadCloser(rc, opt.ReadCallbackFunc)
 	}
 
-	_, err = io.Copy(w, rc)
-	if err != nil {
-		return
-	}
-	return nil
+	return io.Copy(w, rc)
 }
 
 func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (o *typ.Object, err error) {
@@ -166,7 +162,7 @@ func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (
 	return o, nil
 }
 
-func (s *Storage) write(ctx context.Context, path string, r io.Reader, opt *pairStorageWrite) (err error) {
+func (s *Storage) write(ctx context.Context, path string, r io.Reader, opt *pairStorageWrite) (n int64, err error) {
 	var f io.WriteCloser
 	// If path is "-", use stdout directly.
 	if path == "-" {
@@ -175,14 +171,14 @@ func (s *Storage) write(ctx context.Context, path string, r io.Reader, opt *pair
 		// Create dir for path.
 		err = s.createDir(path)
 		if err != nil {
-			return err
+			return n, err
 		}
 
 		rp := s.getAbsPath(path)
 
 		f, err = s.osCreate(rp)
 		if err != nil {
-			return err
+			return n, err
 		}
 	}
 
@@ -191,14 +187,9 @@ func (s *Storage) write(ctx context.Context, path string, r io.Reader, opt *pair
 	}
 
 	if opt.HasSize {
-		_, err = s.ioCopyN(f, r, opt.Size)
-	} else {
-		_, err = s.ioCopyBuffer(f, r, make([]byte, 1024*1024))
+		return s.ioCopyN(f, r, opt.Size)
 	}
-	if err != nil {
-		return err
-	}
-	return
+	return s.ioCopyBuffer(f, r, make([]byte, 1024*1024))
 }
 
 func (s *Storage) copy(ctx context.Context, src string, dst string, opt *pairStorageCopy) (err error) {
