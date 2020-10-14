@@ -779,7 +779,7 @@ func TestStorage_Write(t *testing.T) {
 			},
 			func(dst io.Writer, src io.Reader, n int64) (written int64, err error) {
 				assert.Equal(t, int64(1234), n)
-				return 1234, nil
+				return n, nil
 			},
 			nil,
 			false,
@@ -790,7 +790,7 @@ func TestStorage_Write(t *testing.T) {
 			nil,
 			func(dst io.Writer, src io.Reader, n int64) (written int64, err error) {
 				assert.Equal(t, int64(1234), n)
-				return 1234, nil
+				return n, nil
 			},
 			nil,
 			false,
