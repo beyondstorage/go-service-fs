@@ -23,57 +23,70 @@ func (s *Storage) delete(ctx context.Context, path string, opt *pairStorageDelet
 	return nil
 }
 
-func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListDir) (oi *typ.ObjectIterator, err error) {
-	// Always keep service original name as rp.
-	rp := s.getAbsPath(dir)
-	// Then convert the dir to slash separator.
-	dir = filepath.ToSlash(dir)
+type listDirInput struct {
+	rp  string
+	dir string
 
-	fn := typ.NextObjectFunc(func(page *typ.ObjectPage) error {
-		fi, err := s.ioutilReadDir(rp)
+	enableLinkFollow bool
+}
+
+func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListDir) (oi *typ.ObjectIterator, err error) {
+	input := listDirInput{
+		// Always keep service original name as rp.
+		rp: s.getAbsPath(dir),
+		// Then convert the dir to slash separator.
+		dir:              filepath.ToSlash(dir),
+		enableLinkFollow: opt.EnableLinkFollow,
+	}
+
+	return typ.NewObjectIterator(ctx, s.listDirNext, &input), nil
+}
+
+func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err error) {
+	input := page.Status.(*listDirInput)
+
+	fi, err := s.ioutilReadDir(input.rp)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range fi {
+		// if v is a link, and client not follow link, skip it
+		if v.Mode()&os.ModeSymlink != 0 && !input.enableLinkFollow {
+			continue
+		}
+
+		target, err := checkLink(v, input.rp)
 		if err != nil {
 			return err
 		}
 
-		for _, v := range fi {
-			// if v is a link, and client not follow link, skip it
-			if v.Mode()&os.ModeSymlink != 0 && !opt.EnableLinkFollow {
-				continue
-			}
-
-			target, err := checkLink(v, rp)
-			if err != nil {
-				return err
-			}
-
-			o := &typ.Object{
-				// Always keep service original name as ID.
-				ID: filepath.Join(rp, v.Name()),
-				// Object's name should always be separated by slash (/)
-				Name:       path.Join(dir, v.Name()),
-				ObjectMeta: typ.NewObjectMeta(),
-			}
-
-			if target.IsDir() {
-				o.Type = typ.ObjectTypeDir
-				page.Data = append(page.Data, o)
-				continue
-			}
-
-			o.SetSize(target.Size())
-			o.SetUpdatedAt(target.ModTime())
-
-			if v := mime.DetectFilePath(target.Name()); v != "" {
-				o.SetContentType(v)
-			}
-
-			o.Type = typ.ObjectTypeFile
-			page.Data = append(page.Data, o)
+		o := &typ.Object{
+			// Always keep service original name as ID.
+			ID: filepath.Join(input.rp, v.Name()),
+			// Object's name should always be separated by slash (/)
+			Name:       path.Join(input.dir, v.Name()),
+			ObjectMeta: typ.NewObjectMeta(),
 		}
 
-		return typ.IterateDone
-	})
-	return typ.NewObjectIterator(fn), nil
+		if target.IsDir() {
+			o.Type = typ.ObjectTypeDir
+			page.Data = append(page.Data, o)
+			continue
+		}
+
+		o.SetSize(target.Size())
+		o.SetUpdatedAt(target.ModTime())
+
+		if v := mime.DetectFilePath(target.Name()); v != "" {
+			o.SetContentType(v)
+		}
+
+		o.Type = typ.ObjectTypeFile
+		page.Data = append(page.Data, o)
+	}
+
+	return typ.IterateDone
 }
 
 func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta typ.StorageMeta, err error) {
