@@ -61,13 +61,11 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 			return err
 		}
 
-		o := &typ.Object{
-			// Always keep service original name as ID.
-			ID: filepath.Join(input.rp, v.Name()),
-			// Object's name should always be separated by slash (/)
-			Name:       path.Join(input.dir, v.Name()),
-			ObjectMeta: typ.NewObjectMeta(),
-		}
+		o := s.newObject(false)
+		// Always keep service original name as ID.
+		o.ID = filepath.Join(input.rp, v.Name())
+		// Object's name should always be separated by slash (/)
+		o.Name = path.Join(input.dir, v.Name())
 
 		if target.IsDir() {
 			o.Type = typ.ObjectTypeDir
@@ -129,12 +127,11 @@ func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairS
 
 func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (o *typ.Object, err error) {
 	if path == "-" {
-		return &typ.Object{
-			ID:         "-",
-			Name:       "-",
-			Type:       typ.ObjectTypeStream,
-			ObjectMeta: typ.NewObjectMeta(),
-		}, nil
+		o = s.newObject(true)
+		o.ID = "-"
+		o.Name = "-"
+		o.Type = typ.ObjectTypeStream
+		return
 	}
 
 	rp := s.getAbsPath(path)
@@ -144,11 +141,9 @@ func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (
 		return nil, err
 	}
 
-	o = &typ.Object{
-		ID:         rp,
-		Name:       path,
-		ObjectMeta: typ.NewObjectMeta(),
-	}
+	o = s.newObject(true)
+	o.ID = rp
+	o.Name = path
 
 	if fi.IsDir() {
 		o.Type = typ.ObjectTypeDir
