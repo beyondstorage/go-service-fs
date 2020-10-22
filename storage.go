@@ -27,7 +27,7 @@ type listDirInput struct {
 	rp  string
 	dir string
 
-	enableLinkFlow bool
+	enableLinkFollow bool
 }
 
 func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListDir) (oi *typ.ObjectIterator, err error) {
@@ -35,8 +35,8 @@ func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListD
 		// Always keep service original name as rp.
 		rp: s.getAbsPath(dir),
 		// Then convert the dir to slash separator.
-		dir:            filepath.ToSlash(dir),
-		enableLinkFlow: opt.EnableLinkFollow,
+		dir:              filepath.ToSlash(dir),
+		enableLinkFollow: opt.EnableLinkFollow,
 	}
 
 	return typ.NewObjectIterator(ctx, s.listDirNext, &input), nil
@@ -52,7 +52,7 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 
 	for _, v := range fi {
 		// if v is a link, and client not follow link, skip it
-		if v.Mode()&os.ModeSymlink != 0 && !input.enableLinkFlow {
+		if v.Mode()&os.ModeSymlink != 0 && !input.enableLinkFollow {
 			continue
 		}
 
