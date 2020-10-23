@@ -1,7 +1,7 @@
 bou.ke/monkey v1.0.2 h1:kWcnsrCNUatbxncxR/ThdYqbytgOIArtYWqcQLQzKLI=
 bou.ke/monkey v1.0.2/go.mod h1:OqickVX3tNx6t33n1xvtTtu85YN5s6cKwVug+oHMaIA=
-github.com/aos-dev/go-storage/v2 v2.0.0-20201022114937-52cb2e1e440b h1:ClVKhP8c3j1k4qDdn3OcoCmMtWxmlYi04SJWMrDD9yI=
-github.com/aos-dev/go-storage/v2 v2.0.0-20201022114937-52cb2e1e440b/go.mod h1:fdonF870IKNAqZMHnHr3gs/RImEqx9kjyJ33k4LtBEI=
+github.com/aos-dev/go-storage/v2 v2.0.0-20201023085333-fd7388b301b6 h1:34r/F9gkjabfCOPirMCQoh6XU/OEoizauTVByopDGB8=
+github.com/aos-dev/go-storage/v2 v2.0.0-20201023085333-fd7388b301b6/go.mod h1:fdonF870IKNAqZMHnHr3gs/RImEqx9kjyJ33k4LtBEI=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang/mock v1.4.3 h1:GV+pQPG/EUUbkh47niozDcADz6go/dUwhVzdUQHIVRw=
