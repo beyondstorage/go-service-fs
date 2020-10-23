@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	bou.ke/monkey v1.0.2
-	github.com/aos-dev/go-storage/v2 v2.0.0-20201021090247-828ece82a9ec
+	github.com/aos-dev/go-storage/v2 v2.0.0-20201023085333-fd7388b301b6
 	github.com/golang/mock v1.4.3
 	github.com/google/uuid v1.1.1
 	github.com/qingstor/go-mime v0.1.0

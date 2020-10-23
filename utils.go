@@ -91,6 +91,10 @@ func formatError(err error) error {
 	}
 }
 
+func (s *Storage) newObject(done bool) *typ.Object {
+	return typ.NewObject(s, done)
+}
+
 func (s *Storage) createDir(path string) (err error) {
 	defer func() {
 		err = s.formatError("create_dir", err, path)
