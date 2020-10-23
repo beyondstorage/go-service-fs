@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/qingstor/go-mime"
@@ -28,6 +27,9 @@ type listDirInput struct {
 	dir string
 
 	enableLinkFollow bool
+
+	f   *os.File
+	buf []byte
 }
 
 func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListDir) (oi *typ.ObjectIterator, err error) {
@@ -37,54 +39,11 @@ func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListD
 		// Then convert the dir to slash separator.
 		dir:              filepath.ToSlash(dir),
 		enableLinkFollow: opt.EnableLinkFollow,
+
+		buf: make([]byte, 8192),
 	}
 
 	return typ.NewObjectIterator(ctx, s.listDirNext, &input), nil
-}
-
-func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err error) {
-	input := page.Status.(*listDirInput)
-
-	fi, err := s.ioutilReadDir(input.rp)
-	if err != nil {
-		return err
-	}
-
-	for _, v := range fi {
-		// if v is a link, and client not follow link, skip it
-		if v.Mode()&os.ModeSymlink != 0 && !input.enableLinkFollow {
-			continue
-		}
-
-		target, err := checkLink(v, input.rp)
-		if err != nil {
-			return err
-		}
-
-		o := s.newObject(false)
-		// Always keep service original name as ID.
-		o.ID = filepath.Join(input.rp, v.Name())
-		// Object's name should always be separated by slash (/)
-		o.Name = path.Join(input.dir, v.Name())
-
-		if target.IsDir() {
-			o.Type = typ.ObjectTypeDir
-			page.Data = append(page.Data, o)
-			continue
-		}
-
-		o.SetSize(target.Size())
-		o.SetUpdatedAt(target.ModTime())
-
-		if v := mime.DetectFilePath(target.Name()); v != "" {
-			o.SetContentType(v)
-		}
-
-		o.Type = typ.ObjectTypeFile
-		page.Data = append(page.Data, o)
-	}
-
-	return typ.IterateDone
 }
 
 func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta typ.StorageMeta, err error) {

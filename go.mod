@@ -9,4 +9,5 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/qingstor/go-mime v0.1.0
 	github.com/stretchr/testify v1.6.1
+	golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
 )
