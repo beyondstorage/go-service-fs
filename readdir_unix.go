@@ -110,6 +110,14 @@ type file struct {
 func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err error) {
 	input := page.Status.(*listDirInput)
 
+	defer func() {
+		// Make sure file has been close every time we return an error
+		if err != nil && input.f != nil {
+			_ = input.f.Close()
+			input.f = nil
+		}
+	}()
+
 	// Open dir before we read it.
 	if input.f == nil {
 		input.f, err = s.osOpen(input.rp)
@@ -125,8 +133,6 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 
 	// Whole dir has been read, return IterateDone to mark this iteration is done
 	if len(files) == 0 {
-		_ = input.f.Close()
-		input.f = nil
 		return typ.IterateDone
 	}
 
