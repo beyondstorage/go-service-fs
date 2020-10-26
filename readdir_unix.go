@@ -116,6 +116,7 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 		fname := string(name)
 
 		o := s.newObject(false)
+		// FIXME: filepath.Join and path.Join is really slow here, we need handle this.
 		// Always keep service original name as ID.
 		o.ID = filepath.Join(input.rp, fname)
 		// Object's name should always be separated by slash (/)
