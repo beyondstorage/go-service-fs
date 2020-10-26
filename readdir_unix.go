@@ -45,15 +45,34 @@ const (
 	DirentTypeWhiteOut = 14
 )
 
-func getFiles(fd int, buf []byte) (files []file, err error) {
-	n, err := unix.ReadDirent(fd, buf)
-	if err != nil {
-		return nil, err
-	}
-	if n <= 0 {
-		return nil, nil
+func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err error) {
+	input := page.Status.(*listDirInput)
+
+	defer func() {
+		// Make sure file has been close every time we return an error
+		if err != nil && input.f != nil {
+			_ = input.f.Close()
+			input.f = nil
+		}
+	}()
+
+	// Open dir before we read it.
+	if input.f == nil {
+		input.f, err = s.osOpen(input.rp)
+		if err != nil {
+			return
+		}
 	}
 
+	n, err := unix.ReadDirent(int(input.f.Fd()), input.buf)
+	if err != nil {
+		return err
+	}
+	if n <= 0 {
+		return typ.IterateDone
+	}
+
+	buf := input.buf
 	for len(buf) > 0 {
 		// Get and check reclen
 		reclen, ok := direntReclen(buf)
@@ -93,57 +112,16 @@ func getFiles(fd int, buf []byte) (files []file, err error) {
 			continue
 		}
 
-		files = append(files, file{
-			name: string(name),
-			ty:   ty,
-		})
-	}
+		// Format object
+		fname := string(name)
 
-	return files, nil
-}
-
-type file struct {
-	name string
-	ty   uint8
-}
-
-func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err error) {
-	input := page.Status.(*listDirInput)
-
-	defer func() {
-		// Make sure file has been close every time we return an error
-		if err != nil && input.f != nil {
-			_ = input.f.Close()
-			input.f = nil
-		}
-	}()
-
-	// Open dir before we read it.
-	if input.f == nil {
-		input.f, err = s.osOpen(input.rp)
-		if err != nil {
-			return
-		}
-	}
-
-	files, err := getFiles(int(input.f.Fd()), input.buf)
-	if err != nil {
-		return
-	}
-
-	// Whole dir has been read, return IterateDone to mark this iteration is done
-	if len(files) == 0 {
-		return typ.IterateDone
-	}
-
-	for _, v := range files {
 		o := s.newObject(false)
 		// Always keep service original name as ID.
-		o.ID = filepath.Join(input.rp, v.name)
+		o.ID = filepath.Join(input.rp, fname)
 		// Object's name should always be separated by slash (/)
-		o.Name = path.Join(input.dir, v.name)
+		o.Name = path.Join(input.dir, fname)
 
-		switch v.ty {
+		switch ty {
 		case DirentTypeDirectory:
 			o.Type = typ.ObjectTypeDir
 		case DirentTypeRegular:
