@@ -1,5 +1,5 @@
-github.com/aos-dev/go-storage/v2 v2.0.0-20201026062441-7eee69d066e0 h1:ClQPnpTrgwfNvkxq8+RKBAhTYskoncuX4FYEZ5yvsWM=
-github.com/aos-dev/go-storage/v2 v2.0.0-20201026062441-7eee69d066e0/go.mod h1:fdonF870IKNAqZMHnHr3gs/RImEqx9kjyJ33k4LtBEI=
+github.com/aos-dev/go-storage/v2 v2.0.0-20201026064323-2ae8766af0f1 h1:NH2wDXj5ipDBF+3NOHhtr4OFTVzVBt2toxr+6nem7KU=
+github.com/aos-dev/go-storage/v2 v2.0.0-20201026064323-2ae8766af0f1/go.mod h1:fdonF870IKNAqZMHnHr3gs/RImEqx9kjyJ33k4LtBEI=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang/mock v1.4.3 h1:GV+pQPG/EUUbkh47niozDcADz6go/dUwhVzdUQHIVRw=
