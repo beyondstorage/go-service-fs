@@ -108,13 +108,19 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 				break
 			}
 		}
-		// Check for useless names before allocating a string.
-		if string(name) == "." || string(name) == ".." {
-			continue
-		}
-
 		// Format object
 		fname := string(name)
+		// Check for useless names before allocating a string.
+		if fname == "." || fname == ".." {
+			continue
+		}
+		if !input.started {
+			if fname != input.continuationToken {
+				continue
+			}
+			// ContinuationToken is the next file, we should include this file.
+			input.started = true
+		}
 
 		o := s.newObject(false)
 		// FIXME: filepath.Join and path.Join is really slow here, we need handle this.
@@ -130,6 +136,8 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 			o.Type = typ.ObjectTypeFile
 		}
 
+		// Set update name here.
+		input.continuationToken = o.Name
 		page.Data = append(page.Data, o)
 	}
 

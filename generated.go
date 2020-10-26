@@ -170,6 +170,7 @@ func parsePairStorageDelete(opts []*Pair) (*pairStorageDelete, error) {
 var pairStorageListDirMap = map[string]struct{}{
 	// Required pairs
 	// Optional pairs
+	ps.ContinuationToken: struct{}{},
 	PairEnableLinkFollow: struct{}{},
 	// Generated pairs
 }
@@ -180,8 +181,10 @@ type pairStorageListDir struct {
 
 	// Required pairs
 	// Optional pairs
-	HasEnableLinkFollow bool
-	EnableLinkFollow    bool
+	HasContinuationToken bool
+	ContinuationToken    string
+	HasEnableLinkFollow  bool
+	EnableLinkFollow     bool
 	// Generated pairs
 }
 
@@ -203,6 +206,11 @@ func parsePairStorageListDir(opts []*Pair) (*pairStorageListDir, error) {
 
 	// Handle required pairs
 	// Handle optional pairs
+	v, ok = values[ps.ContinuationToken]
+	if ok {
+		result.HasContinuationToken = true
+		result.ContinuationToken = v.(string)
+	}
 	v, ok = values[PairEnableLinkFollow]
 	if ok {
 		result.HasEnableLinkFollow = true

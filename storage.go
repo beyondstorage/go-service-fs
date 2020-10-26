@@ -28,8 +28,15 @@ type listDirInput struct {
 
 	enableLinkFollow bool
 
+	started           bool
+	continuationToken string
+
 	f   *os.File
 	buf []byte
+}
+
+func (input *listDirInput) ContinuationToken() string {
+	return input.continuationToken
 }
 
 func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListDir) (oi *typ.ObjectIterator, err error) {
@@ -39,6 +46,11 @@ func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListD
 		// Then convert the dir to slash separator.
 		dir:              filepath.ToSlash(dir),
 		enableLinkFollow: opt.EnableLinkFollow,
+
+		// if HasContinuationToken, we should start after we scanned this token.
+		// else, we can start directly.
+		started:           !opt.HasContinuationToken,
+		continuationToken: opt.ContinuationToken,
 
 		buf: make([]byte, 8192),
 	}

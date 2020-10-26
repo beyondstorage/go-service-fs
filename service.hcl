@@ -8,7 +8,7 @@ namespace "storage" {
   }
 
   op "list_dir" {
-    optional = ["enable_link_follow"]
+    optional = ["continuation_token", "enable_link_follow"]
   }
   op "read" {
     optional = ["offset", "read_callback_func", "size"]
