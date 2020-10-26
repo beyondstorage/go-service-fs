@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/aos-dev/go-storage/v2/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func fsReaddir(b *testing.B) {
@@ -43,7 +44,7 @@ func TestGetFilesFs(t *testing.T) {
 		if err == types.IterateDone {
 			break
 		}
-		t.Logf("%v", o)
+		assert.NotNil(t, o)
 	}
 }
 

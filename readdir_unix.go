@@ -4,6 +4,7 @@ package fs
 
 import (
 	"context"
+	"os"
 	"path"
 	"path/filepath"
 
@@ -58,7 +59,7 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 
 	// Open dir before we read it.
 	if input.f == nil {
-		input.f, err = s.osOpen(input.rp)
+		input.f, err = os.Open(input.rp)
 		if err != nil {
 			return
 		}
