@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/qingstor/go-mime"
@@ -16,7 +15,7 @@ import (
 func (s *Storage) delete(ctx context.Context, path string, opt *pairStorageDelete) (err error) {
 	rp := s.getAbsPath(path)
 
-	err = s.osRemove(rp)
+	err = os.Remove(rp)
 	if err != nil {
 		return err
 	}
@@ -28,6 +27,9 @@ type listDirInput struct {
 	dir string
 
 	enableLinkFollow bool
+
+	f   *os.File
+	buf []byte
 }
 
 func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListDir) (oi *typ.ObjectIterator, err error) {
@@ -37,54 +39,11 @@ func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListD
 		// Then convert the dir to slash separator.
 		dir:              filepath.ToSlash(dir),
 		enableLinkFollow: opt.EnableLinkFollow,
+
+		buf: make([]byte, 8192),
 	}
 
 	return typ.NewObjectIterator(ctx, s.listDirNext, &input), nil
-}
-
-func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err error) {
-	input := page.Status.(*listDirInput)
-
-	fi, err := s.ioutilReadDir(input.rp)
-	if err != nil {
-		return err
-	}
-
-	for _, v := range fi {
-		// if v is a link, and client not follow link, skip it
-		if v.Mode()&os.ModeSymlink != 0 && !input.enableLinkFollow {
-			continue
-		}
-
-		target, err := checkLink(v, input.rp)
-		if err != nil {
-			return err
-		}
-
-		o := s.newObject(false)
-		// Always keep service original name as ID.
-		o.ID = filepath.Join(input.rp, v.Name())
-		// Object's name should always be separated by slash (/)
-		o.Name = path.Join(input.dir, v.Name())
-
-		if target.IsDir() {
-			o.Type = typ.ObjectTypeDir
-			page.Data = append(page.Data, o)
-			continue
-		}
-
-		o.SetSize(target.Size())
-		o.SetUpdatedAt(target.ModTime())
-
-		if v := mime.DetectFilePath(target.Name()); v != "" {
-			o.SetContentType(v)
-		}
-
-		o.Type = typ.ObjectTypeFile
-		page.Data = append(page.Data, o)
-	}
-
-	return typ.IterateDone
 }
 
 func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta typ.StorageMeta, err error) {
@@ -101,7 +60,7 @@ func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairS
 	} else {
 		rp := s.getAbsPath(path)
 
-		f, err := s.osOpen(rp)
+		f, err := os.Open(rp)
 		if err != nil {
 			return n, err
 		}
@@ -136,7 +95,7 @@ func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (
 
 	rp := s.getAbsPath(path)
 
-	fi, err := s.osStat(rp)
+	fi, err := os.Stat(rp)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +143,7 @@ func (s *Storage) write(ctx context.Context, path string, r io.Reader, opt *pair
 
 		rp := s.getAbsPath(path)
 
-		f, err = s.osCreate(rp)
+		f, err = os.Create(rp)
 		if err != nil {
 			return n, err
 		}
@@ -195,9 +154,9 @@ func (s *Storage) write(ctx context.Context, path string, r io.Reader, opt *pair
 	}
 
 	if opt.HasSize {
-		return s.ioCopyN(f, r, opt.Size)
+		return io.CopyN(f, r, opt.Size)
 	}
-	return s.ioCopyBuffer(f, r, make([]byte, 1024*1024))
+	return io.CopyBuffer(f, r, make([]byte, 1024*1024))
 }
 
 func (s *Storage) copy(ctx context.Context, src string, dst string, opt *pairStorageCopy) (err error) {
@@ -210,19 +169,19 @@ func (s *Storage) copy(ctx context.Context, src string, dst string, opt *pairSto
 		return err
 	}
 
-	srcFile, err := s.osOpen(rs)
+	srcFile, err := os.Open(rs)
 	if err != nil {
 		return err
 	}
 	defer srcFile.Close()
 
-	dstFile, err := s.osCreate(rd)
+	dstFile, err := os.Create(rd)
 	if err != nil {
 		return err
 	}
 	defer dstFile.Close()
 
-	_, err = s.ioCopyBuffer(dstFile, srcFile, make([]byte, 1024*1024))
+	_, err = io.CopyBuffer(dstFile, srcFile, make([]byte, 1024*1024))
 	if err != nil {
 		return err
 	}
@@ -239,7 +198,7 @@ func (s *Storage) move(ctx context.Context, src string, dst string, opt *pairSto
 		return err
 	}
 
-	err = s.osRename(rs, rd)
+	err = os.Rename(rs, rd)
 	if err != nil {
 		return err
 	}

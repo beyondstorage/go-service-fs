@@ -2,8 +2,6 @@ package fs
 
 import (
 	"fmt"
-	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -18,17 +16,6 @@ const StreamModeType = os.ModeNamedPipe | os.ModeSocket | os.ModeDevice | os.Mod
 type Storage struct {
 	// options for this storager.
 	workDir string // workDir dir for all operation.
-
-	// All stdlib call will be added here for better unit test.
-	ioCopyBuffer  func(dst io.Writer, src io.Reader, buf []byte) (written int64, err error)
-	ioCopyN       func(dst io.Writer, src io.Reader, n int64) (written int64, err error)
-	ioutilReadDir func(dirname string) ([]os.FileInfo, error)
-	osCreate      func(name string) (*os.File, error)
-	osMkdirAll    func(path string, perm os.FileMode) error
-	osOpen        func(name string) (*os.File, error)
-	osRemove      func(name string) error
-	osRename      func(oldpath, newpath string) error
-	osStat        func(name string) (os.FileInfo, error)
 }
 
 // String implements Storager.String
@@ -54,16 +41,6 @@ func newStorager(pairs ...*typ.Pair) (store *Storage, err error) {
 	}
 
 	store = &Storage{
-		ioCopyBuffer:  io.CopyBuffer,
-		ioCopyN:       io.CopyN,
-		ioutilReadDir: ioutil.ReadDir,
-		osCreate:      os.Create,
-		osMkdirAll:    os.MkdirAll,
-		osOpen:        os.Open,
-		osRemove:      os.Remove,
-		osRename:      os.Rename,
-		osStat:        os.Stat,
-
 		workDir: "/",
 	}
 
@@ -72,7 +49,7 @@ func newStorager(pairs ...*typ.Pair) (store *Storage, err error) {
 	}
 
 	// Check and create work dir
-	err = store.osMkdirAll(store.workDir, 0755)
+	err = os.MkdirAll(store.workDir, 0755)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +83,7 @@ func (s *Storage) createDir(path string) (err error) {
 		return
 	}
 
-	err = s.osMkdirAll(rp, 0755)
+	err = os.MkdirAll(rp, 0755)
 	if err != nil {
 		return err
 	}
