@@ -24,12 +24,12 @@ func (s *Storage) String() string {
 }
 
 // NewStorager will create Storager only.
-func NewStorager(pairs ...*typ.Pair) (typ.Storager, error) {
+func NewStorager(pairs ...typ.Pair) (typ.Storager, error) {
 	return newStorager(pairs...)
 }
 
 // newStorager will create a fs client.
-func newStorager(pairs ...*typ.Pair) (store *Storage, err error) {
+func newStorager(pairs ...typ.Pair) (store *Storage, err error) {
 	defer func() {
 		if err != nil {
 			err = &services.InitError{Op: services.OpNewStorager, Type: Type, Err: err, Pairs: pairs}
