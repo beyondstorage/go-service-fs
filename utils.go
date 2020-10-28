@@ -12,6 +12,12 @@ import (
 // StreamModeType is the stream mode type.
 const StreamModeType = os.ModeNamedPipe | os.ModeSocket | os.ModeDevice | os.ModeCharDevice
 
+const (
+	Stdin  = "/dev/stdin"
+	Stdout = "/dev/stdout"
+	Stderr = "/dev/stderr"
+)
+
 // Storage is the fs client.
 type Storage struct {
 	// options for this storager.
@@ -72,33 +78,63 @@ func (s *Storage) newObject(done bool) *typ.Object {
 	return typ.NewObject(s, done)
 }
 
-func (s *Storage) createDir(path string) (err error) {
-	defer func() {
-		err = s.formatError("create_dir", err, path)
-	}()
-
-	rp := s.getDirPath(path)
-	// Don't need to create work dir.
-	if rp == s.workDir {
-		return
+func (s *Storage) openFile(absPath string) (f *os.File, err error) {
+	switch absPath {
+	case Stdin:
+		f = os.Stdin
+	case Stdout:
+		f = os.Stdout
+	case Stderr:
+		f = os.Stderr
+	default:
+		f, err = os.Open(absPath)
 	}
 
-	err = os.MkdirAll(rp, 0755)
-	if err != nil {
-		return err
+	return
+}
+
+func (s *Storage) createFile(absPath string) (f *os.File, err error) {
+	switch absPath {
+	case Stdin:
+		f = os.Stdin
+	case Stdout:
+		f = os.Stdout
+	case Stderr:
+		f = os.Stderr
+	default:
+		defer func() {
+			err = s.formatError("create_file", err, absPath)
+		}()
+
+		// Create dir before create file
+		err = os.MkdirAll(filepath.Dir(absPath), 0755)
+		if err != nil {
+			return nil, err
+		}
+
+		f, err = os.Create(absPath)
 	}
+
+	return
+}
+
+func (s *Storage) statFile(absPath string) (fi os.FileInfo, err error) {
+	switch absPath {
+	case Stdin:
+		fi, err = os.Stdin.Stat()
+	case Stdout:
+		fi, err = os.Stdout.Stat()
+	case Stderr:
+		fi, err = os.Stderr.Stat()
+	default:
+		fi, err = os.Stat(absPath)
+	}
+
 	return
 }
 
 func (s *Storage) getAbsPath(path string) string {
 	return filepath.Join(s.workDir, path)
-}
-
-func (s *Storage) getDirPath(path string) string {
-	if path == "" {
-		return s.workDir
-	}
-	return filepath.Join(s.workDir, filepath.Dir(path))
 }
 
 func (s *Storage) formatError(op string, err error, path ...string) error {

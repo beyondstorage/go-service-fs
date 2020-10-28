@@ -66,25 +66,21 @@ func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta 
 
 func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairStorageRead) (n int64, err error) {
 	var rc io.ReadCloser
-	// If path is "-", return stdin directly.
-	if path == "-" {
-		rc = os.Stdin
-	} else {
-		rp := s.getAbsPath(path)
 
-		f, err := os.Open(rp)
+	rp := s.getAbsPath(path)
+
+	f, err := s.openFile(rp)
+	if err != nil {
+		return
+	}
+	if opt.HasOffset {
+		_, err = f.Seek(opt.Offset, 0)
 		if err != nil {
 			return n, err
 		}
-		if opt.HasOffset {
-			_, err = f.Seek(opt.Offset, 0)
-			if err != nil {
-				return n, err
-			}
-		}
-
-		rc = f
 	}
+
+	rc = f
 
 	if opt.HasSize {
 		rc = iowrap.LimitReadCloser(rc, opt.Size)
@@ -97,17 +93,9 @@ func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairS
 }
 
 func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (o *typ.Object, err error) {
-	if path == "-" {
-		o = s.newObject(true)
-		o.ID = "-"
-		o.Name = "-"
-		o.Type = typ.ObjectTypeStream
-		return
-	}
-
 	rp := s.getAbsPath(path)
 
-	fi, err := os.Stat(rp)
+	fi, err := s.statFile(rp)
 	if err != nil {
 		return nil, err
 	}
@@ -143,22 +131,12 @@ func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (
 
 func (s *Storage) write(ctx context.Context, path string, r io.Reader, opt *pairStorageWrite) (n int64, err error) {
 	var f io.WriteCloser
-	// If path is "-", use stdout directly.
-	if path == "-" {
-		f = os.Stdout
-	} else {
-		// Create dir for path.
-		err = s.createDir(path)
-		if err != nil {
-			return n, err
-		}
 
-		rp := s.getAbsPath(path)
+	rp := s.getAbsPath(path)
 
-		f, err = os.Create(rp)
-		if err != nil {
-			return n, err
-		}
+	f, err = s.createFile(rp)
+	if err != nil {
+		return
 	}
 
 	if opt.HasReadCallbackFunc {
@@ -175,19 +153,13 @@ func (s *Storage) copy(ctx context.Context, src string, dst string, opt *pairSto
 	rs := s.getAbsPath(src)
 	rd := s.getAbsPath(dst)
 
-	// Create dir for dst.
-	err = s.createDir(dst)
-	if err != nil {
-		return err
-	}
-
-	srcFile, err := os.Open(rs)
+	srcFile, err := s.openFile(rs)
 	if err != nil {
 		return err
 	}
 	defer srcFile.Close()
 
-	dstFile, err := os.Create(rd)
+	dstFile, err := s.createFile(rd)
 	if err != nil {
 		return err
 	}
@@ -200,12 +172,12 @@ func (s *Storage) copy(ctx context.Context, src string, dst string, opt *pairSto
 	return
 }
 func (s *Storage) move(ctx context.Context, src string, dst string, opt *pairStorageMove) (err error) {
-
 	rs := s.getAbsPath(src)
 	rd := s.getAbsPath(dst)
 
 	// Create dir for dst path.
-	err = s.createDir(dst)
+	// Create dir before create file
+	err = os.MkdirAll(filepath.Dir(rd), 0755)
 	if err != nil {
 		return err
 	}
