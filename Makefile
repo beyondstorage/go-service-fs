@@ -17,7 +17,7 @@ tools := mockgen definitions
 $(tools):
 	@command -v $@ >/dev/null 2>&1 || echo "$@ is not found, please install it."
 
-check: vet lint
+check: vet
 
 format:
 	@echo "go fmt"
@@ -27,11 +27,6 @@ format:
 vet:
 	@echo "go vet"
 	@go vet ./...
-	@echo "ok"
-
-lint: golint
-	@echo "golint"
-	@golint ./...
 	@echo "ok"
 
 generate: definitions mockgen
