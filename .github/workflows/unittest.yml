@@ -23,7 +23,7 @@ jobs:
       - name: Install mockgen
         run: go get github.com/golang/mock/mockgen
       - name: Install definitions
-        run: go get -u github.com/aos-dev/go-storage/cmd/definitions
+        run: go get github.com/aos-dev/go-storage/cmd/definitions@master
 
       - name: Build
         run: make build
