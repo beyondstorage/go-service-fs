@@ -26,8 +26,6 @@ type listDirInput struct {
 	rp  string
 	dir string
 
-	enableLinkFollow bool
-
 	started           bool
 	continuationToken string
 
@@ -44,8 +42,7 @@ func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListD
 		// Always keep service original name as rp.
 		rp: s.getAbsPath(dir),
 		// Then convert the dir to slash separator.
-		dir:              filepath.ToSlash(dir),
-		enableLinkFollow: opt.EnableLinkFollow,
+		dir: filepath.ToSlash(dir),
 
 		// if HasContinuationToken, we should start after we scanned this token.
 		// else, we can start directly.
@@ -110,22 +107,30 @@ func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (
 	}
 
 	if fi.Mode().IsRegular() {
+		o.Type = typ.ObjectTypeFile
+
 		o.SetSize(fi.Size())
 		o.SetUpdatedAt(fi.ModTime())
 
 		if v := mime.DetectFilePath(path); v != "" {
 			o.SetContentType(v)
 		}
-
-		o.Type = typ.ObjectTypeFile
-		return
-	}
-	if fi.Mode()&StreamModeType != 0 {
-		o.Type = typ.ObjectTypeStream
 		return
 	}
 
-	o.Type = typ.ObjectTypeInvalid
+	if fi.Mode()&os.ModeSymlink != 0 {
+		o.Type = typ.ObjectTypeLink
+
+		target, err := filepath.EvalSymlinks(rp)
+		if err != nil {
+			return nil, err
+		}
+		o.SetTarget(target)
+
+		return o, nil
+	}
+
+	o.Type = typ.ObjectTypeUnknown
 	return o, nil
 }
 
@@ -187,18 +192,4 @@ func (s *Storage) move(ctx context.Context, src string, dst string, opt *pairSto
 		return err
 	}
 	return
-}
-
-func checkLink(v os.FileInfo, dir string) (os.FileInfo, error) {
-	// if v is not link, return directly
-	if v.Mode()&os.ModeSymlink == 0 {
-		return v, nil
-	}
-
-	// otherwise, follow the link to get the target
-	tarPath, err := filepath.EvalSymlinks(filepath.Join(dir, v.Name()))
-	if err != nil {
-		return nil, err
-	}
-	return os.Stat(tarPath)
 }
