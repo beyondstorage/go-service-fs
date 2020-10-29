@@ -9,9 +9,7 @@ import (
 	typ "github.com/aos-dev/go-storage/v2/types"
 )
 
-// StreamModeType is the stream mode type.
-const StreamModeType = os.ModeNamedPipe | os.ModeSocket | os.ModeDevice | os.ModeCharDevice
-
+// Std{in/out/err} support
 const (
 	Stdin  = "/dev/stdin"
 	Stdout = "/dev/stdout"
@@ -127,13 +125,18 @@ func (s *Storage) statFile(absPath string) (fi os.FileInfo, err error) {
 	case Stderr:
 		fi, err = os.Stderr.Stat()
 	default:
-		fi, err = os.Stat(absPath)
+		// Use Lstat here to not follow symlinks.
+		// We will resolve symlinks target while this object's type is link.
+		fi, err = os.Lstat(absPath)
 	}
 
 	return
 }
 
 func (s *Storage) getAbsPath(path string) string {
+	if filepath.IsAbs(path) {
+		return path
+	}
 	return filepath.Join(s.workDir, path)
 }
 
