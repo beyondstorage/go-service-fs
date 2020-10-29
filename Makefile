@@ -11,14 +11,13 @@ help:
 	@echo "  integration_test    to run integration test"
 
 # mockgen: go get github.com/golang/mock/mockgen
-# golint: go get -u golang.org/x/lint/golint
 # definitions: go get -u github.com/aos-dev/go-storage/cmd/definitions
-tools := mockgen golint definitions
+tools := mockgen definitions
 
 $(tools):
 	@command -v $@ >/dev/null 2>&1 || echo "$@ is not found, please install it."
 
-check: vet lint
+check: vet
 
 format:
 	@echo "go fmt"
@@ -28,11 +27,6 @@ format:
 vet:
 	@echo "go vet"
 	@go vet ./...
-	@echo "ok"
-
-lint: golint
-	@echo "golint"
-	@golint ./...
 	@echo "ok"
 
 generate: definitions mockgen
