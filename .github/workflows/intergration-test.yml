@@ -1,0 +1,29 @@
+name: "Integration Test"
+
+on: [push,pull_request]
+
+jobs:
+  integration_test:
+    name: "Integration Test"
+    runs-on: [Linux]
+
+    strategy:
+      matrix:
+        go: [ "1.14", "1.15" ]
+
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Use the latest tests lib
+        working-directory: ./tests
+        run: go get -u github.com/aos-dev/go-integration-test/v2
+
+      - name: Test
+        working-directory: ./tests
+        run: go test -v
