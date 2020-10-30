@@ -5,11 +5,12 @@ on: [push,pull_request]
 jobs:
   unitest:
     name: Unittest
-    runs-on: [self-hosted, Linux]
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        go: [ "1.13", "1.14" ]
+        go: [ "1.14", "1.15" ]
+        os: [self-hosted, Linux, Windows]
 
     steps:
       - name: Set up Go 1.x
