@@ -134,6 +134,10 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 			o.Type = typ.ObjectTypeDir
 		case DirentTypeRegular:
 			o.Type = typ.ObjectTypeFile
+		case DirentTypeLink:
+			o.Type = typ.ObjectTypeLink
+		default:
+			o.Type = typ.ObjectTypeUnknown
 		}
 
 		// Set update name here.

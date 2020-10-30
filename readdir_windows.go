@@ -2,6 +2,7 @@ package fs
 
 import (
 	"context"
+	"os"
 	"path"
 	"path/filepath"
 
@@ -22,7 +23,7 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 
 	// Open dir before we read it.
 	if input.f == nil {
-		input.f, err = s.osOpen(input.rp)
+		input.f, err = os.Open(input.rp)
 		if err != nil {
 			return
 		}
@@ -60,6 +61,12 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 			o.SetType(typ.ObjectTypeDir)
 		case data.FileAttributes&windows.FILE_ATTRIBUTE_NORMAL != 0:
 			o.SetType(typ.ObjectTypeFile)
+		case data.FileAttributes&windows.FILE_ATTRIBUTE_REPARSE_POINT != 0:
+			// FILE_ATTRIBUTE_REPARSE_POINT means this is a file or directory that has
+			// an associated reparse point, or a file that is a symbolic link.
+			o.SetType(typ.ObjectTypeLink)
+		default:
+			o.SetType(typ.ObjectTypeUnknown)
 		}
 		page.Data = append(page.Data, o)
 
