@@ -36,7 +36,7 @@ func NewStorager(pairs ...typ.Pair) (typ.Storager, error) {
 func newStorager(pairs ...typ.Pair) (store *Storage, err error) {
 	defer func() {
 		if err != nil {
-			err = &services.InitError{Op: services.OpNewStorager, Type: Type, Err: err, Pairs: pairs}
+			err = &services.InitError{Op: "new_storager", Type: Type, Err: err, Pairs: pairs}
 		}
 	}()
 	opt, err := parsePairStorageNew(pairs)
