@@ -3,10 +3,13 @@ github.com/aos-dev/go-integration-test/v2 v2.0.0-20201030064335-e9ce2221bdb4/go.
 github.com/aos-dev/go-storage/v2 v2.0.0-20201029080456-60dd5f22b905/go.mod h1:fdonF870IKNAqZMHnHr3gs/RImEqx9kjyJ33k4LtBEI=
 github.com/aos-dev/go-storage/v2 v2.0.0-20201030030412-57f6d503c7c7 h1:AWa2jmaUGktSaveV7mpaYLGCjJx1j11UI9ad1hRzKs8=
 github.com/aos-dev/go-storage/v2 v2.0.0-20201030030412-57f6d503c7c7/go.mod h1:eHpnrdrHP8mMoT1XdPcd7WRYtJKAYIcHmd2MhMO6l9E=
+github.com/aos-dev/go-storage/v2 v2.0.0-alpha.1 h1:JgyJmiXrALpU1AE/RNohB1GP/CGlqLM2DCfXGcYai7w=
+github.com/aos-dev/go-storage/v2 v2.0.0-alpha.1/go.mod h1:Gs+FHLob75L5H9ahn4l+kHE5yjEIeGjxjE0Za1c6RVI=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang/mock v1.4.3 h1:GV+pQPG/EUUbkh47niozDcADz6go/dUwhVzdUQHIVRw=
 github.com/golang/mock v1.4.3/go.mod h1:UOMv5ysSaYNkG+OFQykRIcU/QvvxJf3p21QfJ2Bt3cw=
+github.com/golang/mock v1.4.4/go.mod h1:l3mdAwkq5BuhzHwde/uurv3sEJeZMXNpwsxVWU71h+4=
 github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 h1:EGx4pi6eqNxGaHF6qqu48+N2wcFQ5qg5FXgOdqsJ5d8=
