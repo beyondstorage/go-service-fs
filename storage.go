@@ -55,7 +55,7 @@ func (s *Storage) listDir(ctx context.Context, dir string, opt *pairStorageListD
 	return typ.NewObjectIterator(ctx, s.listDirNext, &input), nil
 }
 
-func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta typ.StorageMeta, err error) {
+func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta *typ.StorageMeta, err error) {
 	meta = typ.NewStorageMeta()
 	meta.WorkDir = s.workDir
 	return meta, nil

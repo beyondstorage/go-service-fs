@@ -519,13 +519,13 @@ func (s *Storage) ListDirWithContext(ctx context.Context, dir string, pairs ...P
 // Metadata will return current storager's metadata.
 //
 // This function will create a context by default.
-func (s *Storage) Metadata(pairs ...Pair) (meta StorageMeta, err error) {
+func (s *Storage) Metadata(pairs ...Pair) (meta *StorageMeta, err error) {
 	ctx := context.Background()
 	return s.MetadataWithContext(ctx, pairs...)
 }
 
 // MetadataWithContext will return current storager's metadata.
-func (s *Storage) MetadataWithContext(ctx context.Context, pairs ...Pair) (meta StorageMeta, err error) {
+func (s *Storage) MetadataWithContext(ctx context.Context, pairs ...Pair) (meta *StorageMeta, err error) {
 	defer func() {
 		err = s.formatError("metadata", err)
 	}()
