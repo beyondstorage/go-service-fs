@@ -10,13 +10,6 @@ help:
 	@echo "  test                to run test"
 	@echo "  integration_test    to run integration test"
 
-# mockgen: go get github.com/golang/mock/mockgen
-# definitions: go get -u github.com/aos-dev/go-storage/cmd/definitions
-tools := mockgen definitions
-
-$(tools):
-	@command -v $@ >/dev/null 2>&1 || echo "$@ is not found, please install it."
-
 check: vet
 
 format:
@@ -29,8 +22,14 @@ vet:
 	@go vet ./...
 	@echo "ok"
 
-generate: definitions mockgen
+definitions:
+	@echo "install definitions"
+	@go run github.com/aos-dev/go-dev-tools/cmd/setup
+
+generate: definitions
 	@echo "generate code"
+	@echo "install definitions"
+	@go run github.com/aos-dev/go-dev-tools/cmd/setup
 	@go generate ./...
 	@go fmt ./...
 	@echo "ok"
@@ -47,7 +46,7 @@ test:
 	@echo "ok"
 
 tidy:
-	@go mod tidy && go mod verify
+	@go run github.com/aos-dev/go-dev-tools/cmd/tidy
 
 clean:
 	@echo "clean generated files"
