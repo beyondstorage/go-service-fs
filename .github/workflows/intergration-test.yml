@@ -22,7 +22,7 @@ jobs:
 
       - name: Use the latest tests lib
         working-directory: ./tests
-        run: go get -u github.com/aos-dev/go-integration-test/v2
+        run: go get -u
 
       - name: Test
         working-directory: ./tests
