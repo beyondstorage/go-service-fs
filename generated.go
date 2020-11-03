@@ -461,7 +461,7 @@ func (s *Storage) Copy(src string, dst string, pairs ...Pair) (err error) {
 // CopyWithContext will copy an Object or multiple object in the service.
 func (s *Storage) CopyWithContext(ctx context.Context, src string, dst string, pairs ...Pair) (err error) {
 	defer func() {
-		err = s.formatError(services.OpCopy, err, src, dst)
+		err = s.formatError("copy", err, src, dst)
 	}()
 	var opt *pairStorageCopy
 	opt, err = parsePairStorageCopy(pairs)
@@ -483,7 +483,7 @@ func (s *Storage) Delete(path string, pairs ...Pair) (err error) {
 // DeleteWithContext will delete an Object from service.
 func (s *Storage) DeleteWithContext(ctx context.Context, path string, pairs ...Pair) (err error) {
 	defer func() {
-		err = s.formatError(services.OpDelete, err, path)
+		err = s.formatError("delete", err, path)
 	}()
 	var opt *pairStorageDelete
 	opt, err = parsePairStorageDelete(pairs)
@@ -505,7 +505,7 @@ func (s *Storage) ListDir(dir string, pairs ...Pair) (oi *ObjectIterator, err er
 // ListDirWithContext will return list a specific dir.
 func (s *Storage) ListDirWithContext(ctx context.Context, dir string, pairs ...Pair) (oi *ObjectIterator, err error) {
 	defer func() {
-		err = s.formatError(services.OpListDir, err, dir)
+		err = s.formatError("list_dir", err, dir)
 	}()
 	var opt *pairStorageListDir
 	opt, err = parsePairStorageListDir(pairs)
@@ -527,7 +527,7 @@ func (s *Storage) Metadata(pairs ...Pair) (meta StorageMeta, err error) {
 // MetadataWithContext will return current storager's metadata.
 func (s *Storage) MetadataWithContext(ctx context.Context, pairs ...Pair) (meta StorageMeta, err error) {
 	defer func() {
-		err = s.formatError(services.OpMetadata, err)
+		err = s.formatError("metadata", err)
 	}()
 	var opt *pairStorageMetadata
 	opt, err = parsePairStorageMetadata(pairs)
@@ -549,7 +549,7 @@ func (s *Storage) Move(src string, dst string, pairs ...Pair) (err error) {
 // MoveWithContext will move an object in the service.
 func (s *Storage) MoveWithContext(ctx context.Context, src string, dst string, pairs ...Pair) (err error) {
 	defer func() {
-		err = s.formatError(services.OpMove, err, src, dst)
+		err = s.formatError("move", err, src, dst)
 	}()
 	var opt *pairStorageMove
 	opt, err = parsePairStorageMove(pairs)
@@ -571,7 +571,7 @@ func (s *Storage) Read(path string, w io.Writer, pairs ...Pair) (n int64, err er
 // ReadWithContext will read the file's data.
 func (s *Storage) ReadWithContext(ctx context.Context, path string, w io.Writer, pairs ...Pair) (n int64, err error) {
 	defer func() {
-		err = s.formatError(services.OpRead, err, path)
+		err = s.formatError("read", err, path)
 	}()
 	var opt *pairStorageRead
 	opt, err = parsePairStorageRead(pairs)
@@ -593,7 +593,7 @@ func (s *Storage) Stat(path string, pairs ...Pair) (o *Object, err error) {
 // StatWithContext will stat a path to get info of an object.
 func (s *Storage) StatWithContext(ctx context.Context, path string, pairs ...Pair) (o *Object, err error) {
 	defer func() {
-		err = s.formatError(services.OpStat, err, path)
+		err = s.formatError("stat", err, path)
 	}()
 	var opt *pairStorageStat
 	opt, err = parsePairStorageStat(pairs)
@@ -615,7 +615,7 @@ func (s *Storage) Write(path string, r io.Reader, pairs ...Pair) (n int64, err e
 // WriteWithContext will write data into a file.
 func (s *Storage) WriteWithContext(ctx context.Context, path string, r io.Reader, pairs ...Pair) (n int64, err error) {
 	defer func() {
-		err = s.formatError(services.OpWrite, err, path)
+		err = s.formatError("write", err, path)
 	}()
 	var opt *pairStorageWrite
 	opt, err = parsePairStorageWrite(pairs)
