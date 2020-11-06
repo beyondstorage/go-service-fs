@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/aos-dev/go-storage/v2/pkg/httpclient"
 	"github.com/aos-dev/go-storage/v2/services"
 	typ "github.com/aos-dev/go-storage/v2/types"
 )
@@ -20,6 +21,8 @@ const (
 type Storage struct {
 	// options for this storager.
 	workDir string // workDir dir for all operation.
+
+	pairPolicy typ.PairPolicy
 }
 
 // String implements Storager.String
@@ -50,6 +53,9 @@ func newStorager(pairs ...typ.Pair) (store *Storage, err error) {
 
 	if opt.HasWorkDir {
 		store.workDir = opt.WorkDir
+	}
+	if opt.HasPairPolicy {
+		store.pairPolicy = opt.PairPolicy
 	}
 
 	// Check and create work dir
@@ -151,4 +157,20 @@ func (s *Storage) formatError(op string, err error, path ...string) error {
 		Storager: s,
 		Path:     path,
 	}
+}
+
+func (s *Storage) convertWriteContentMd5(v string) (string, bool) {
+	return "", true
+}
+
+func (s *Storage) convertWriteContentType(v string) (string, bool) {
+	return "", true
+}
+
+func (s *Storage) convertWriteStorageClass(v string) (string, bool) {
+	return "", true
+}
+
+func convertNewHTTPClientOptions(_ *httpclient.Options) (*httpclient.Options, bool) {
+	return nil, false
 }
