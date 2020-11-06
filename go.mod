@@ -3,7 +3,7 @@ module github.com/aos-dev/go-service-fs
 go 1.14
 
 require (
-	github.com/aos-dev/go-storage/v2 v2.0.0-alpha.1.0.20201103092831-796f520d7c1d
+	github.com/aos-dev/go-storage/v2 v2.0.0-alpha.1.0.20201106073110-4d3092f43c5c
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/qingstor/go-mime v0.1.0

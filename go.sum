@@ -1,13 +1,13 @@
-github.com/aos-dev/go-storage/v2 v2.0.0-alpha.1.0.20201103092831-796f520d7c1d h1:BbGI/4wVXvrUeEsBn9pnP1QDAGIwYxtaZok1JfO/pvM=
-github.com/aos-dev/go-storage/v2 v2.0.0-alpha.1.0.20201103092831-796f520d7c1d/go.mod h1:Gs+FHLob75L5H9ahn4l+kHE5yjEIeGjxjE0Za1c6RVI=
+github.com/aos-dev/go-storage/v2 v2.0.0-alpha.1.0.20201106073110-4d3092f43c5c h1:vou8ZdoRAaeXuB5je+Euf3NIa3OVuuOeH3df7fFsazk=
+github.com/aos-dev/go-storage/v2 v2.0.0-alpha.1.0.20201106073110-4d3092f43c5c/go.mod h1:FHdwTwZa0mo99vr3ZRfMHk7zcxQt7J1wj4QLG+r/EOE=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang/mock v1.4.4 h1:l75CXGRSwbaYNpl/Z2X1XIIAMSCquvXgpVZDhwEIJsc=
 github.com/golang/mock v1.4.4/go.mod h1:l3mdAwkq5BuhzHwde/uurv3sEJeZMXNpwsxVWU71h+4=
-github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
-github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.1.2 h1:EVhdT+1Kseyi1/pUmXKaFxYsDNy9RQYkMWRH68J/W7Y=
+github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
