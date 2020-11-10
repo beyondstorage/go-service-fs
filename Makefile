@@ -22,14 +22,8 @@ vet:
 	@go vet ./...
 	@echo "ok"
 
-definitions:
-	@echo "install definitions"
-	@go run github.com/aos-dev/go-dev-tools/cmd/setup
-
-generate: definitions
+generate:
 	@echo "generate code"
-	@echo "install definitions"
-	@go run github.com/aos-dev/go-dev-tools/cmd/setup
 	@go generate ./...
 	@go fmt ./...
 	@echo "ok"
