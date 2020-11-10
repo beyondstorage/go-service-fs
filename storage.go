@@ -70,6 +70,14 @@ func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairS
 	if err != nil {
 		return
 	}
+	defer func() {
+		closeErr := f.Close()
+		// Only return close error while copy without error
+		if err == nil {
+			err = closeErr
+		}
+	}()
+
 	if opt.HasOffset {
 		_, err = f.Seek(opt.Offset, 0)
 		if err != nil {
