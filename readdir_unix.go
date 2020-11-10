@@ -50,6 +50,10 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 	input := page.Status.(*listDirInput)
 
 	defer func() {
+		err = s.formatError("list_dir_next", err, input.rp)
+	}()
+
+	defer func() {
 		// Make sure file has been close every time we return an error
 		if err != nil && input.f != nil {
 			_ = input.f.Close()
