@@ -35,8 +35,6 @@ type pairStorageNew struct {
 	HasWorkDir    bool
 	WorkDir       string
 	// Generated pairs
-	HasHTTPClientOptions bool
-	HTTPClientOptions    *httpclient.Options
 }
 
 // parsePairStorageNew will parse Pair slice into *pairStorageNew
@@ -47,20 +45,15 @@ func parsePairStorageNew(opts []Pair) (*pairStorageNew, error) {
 
 	for _, v := range opts {
 		switch v.Key {
+		// Required pairs
+		// Optional pairs
 		case "pair_policy":
 			result.HasPairPolicy = true
 			result.PairPolicy = v.Value.(PairPolicy)
 		case "work_dir":
 			result.HasWorkDir = true
 			result.WorkDir = v.Value.(string)
-		case "http_client_options":
-			value, ok := convertNewHTTPClientOptions(v.Value.(*httpclient.Options))
-			if ok {
-				result.HasHTTPClientOptions = true
-				result.HTTPClientOptions = value
-			} else {
-				result.HasHTTPClientOptions = false
-			}
+			// Generated pairs
 		}
 	}
 
@@ -84,10 +77,15 @@ func (s *Storage) parsePairStorageCopy(opts []Pair) (*pairStorageCopy, error) {
 
 	for _, v := range opts {
 		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		// Generated pairs
 		default:
+
 			if s.pairPolicy.All || s.pairPolicy.Copy {
 				return nil, services.NewPairUnsupportedError(v)
 			}
+
 		}
 	}
 
@@ -111,10 +109,15 @@ func (s *Storage) parsePairStorageDelete(opts []Pair) (*pairStorageDelete, error
 
 	for _, v := range opts {
 		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		// Generated pairs
 		default:
+
 			if s.pairPolicy.All || s.pairPolicy.Delete {
 				return nil, services.NewPairUnsupportedError(v)
 			}
+
 		}
 	}
 
@@ -140,13 +143,18 @@ func (s *Storage) parsePairStorageListDir(opts []Pair) (*pairStorageListDir, err
 
 	for _, v := range opts {
 		switch v.Key {
+		// Required pairs
+		// Optional pairs
 		case "continuation_token":
 			result.HasContinuationToken = true
 			result.ContinuationToken = v.Value.(string)
+		// Generated pairs
 		default:
+
 			if s.pairPolicy.All || s.pairPolicy.ListDir {
 				return nil, services.NewPairUnsupportedError(v)
 			}
+
 		}
 	}
 
@@ -170,10 +178,15 @@ func (s *Storage) parsePairStorageMetadata(opts []Pair) (*pairStorageMetadata, e
 
 	for _, v := range opts {
 		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		// Generated pairs
 		default:
+
 			if s.pairPolicy.All || s.pairPolicy.Metadata {
 				return nil, services.NewPairUnsupportedError(v)
 			}
+
 		}
 	}
 
@@ -197,10 +210,15 @@ func (s *Storage) parsePairStorageMove(opts []Pair) (*pairStorageMove, error) {
 
 	for _, v := range opts {
 		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		// Generated pairs
 		default:
+
 			if s.pairPolicy.All || s.pairPolicy.Move {
 				return nil, services.NewPairUnsupportedError(v)
 			}
+
 		}
 	}
 
@@ -230,6 +248,8 @@ func (s *Storage) parsePairStorageRead(opts []Pair) (*pairStorageRead, error) {
 
 	for _, v := range opts {
 		switch v.Key {
+		// Required pairs
+		// Optional pairs
 		case "offset":
 			result.HasOffset = true
 			result.Offset = v.Value.(int64)
@@ -239,10 +259,13 @@ func (s *Storage) parsePairStorageRead(opts []Pair) (*pairStorageRead, error) {
 		case "size":
 			result.HasSize = true
 			result.Size = v.Value.(int64)
+		// Generated pairs
 		default:
+
 			if s.pairPolicy.All || s.pairPolicy.Read {
 				return nil, services.NewPairUnsupportedError(v)
 			}
+
 		}
 	}
 
@@ -266,10 +289,15 @@ func (s *Storage) parsePairStorageStat(opts []Pair) (*pairStorageStat, error) {
 
 	for _, v := range opts {
 		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		// Generated pairs
 		default:
+
 			if s.pairPolicy.All || s.pairPolicy.Stat {
 				return nil, services.NewPairUnsupportedError(v)
 			}
+
 		}
 	}
 
@@ -305,6 +333,8 @@ func (s *Storage) parsePairStorageWrite(opts []Pair) (*pairStorageWrite, error) 
 
 	for _, v := range opts {
 		switch v.Key {
+		// Required pairs
+		// Optional pairs
 		case "offset":
 			result.HasOffset = true
 			result.Offset = v.Value.(int64)
@@ -314,15 +344,18 @@ func (s *Storage) parsePairStorageWrite(opts []Pair) (*pairStorageWrite, error) 
 		case "size":
 			result.HasSize = true
 			result.Size = v.Value.(int64)
+		// Generated pairs
 		case "content_md5":
 			value, ok := s.convertWriteContentMd5(v.Value.(string))
 			if ok {
 				result.HasContentMd5 = true
 				result.ContentMd5 = value
 			} else {
+
 				if s.pairPolicy.All || s.pairPolicy.Write || s.pairPolicy.WriteContentMd5 {
 					return nil, services.NewPairUnsupportedError(v)
 				}
+
 			}
 		case "content_type":
 			value, ok := s.convertWriteContentType(v.Value.(string))
@@ -330,9 +363,11 @@ func (s *Storage) parsePairStorageWrite(opts []Pair) (*pairStorageWrite, error) 
 				result.HasContentType = true
 				result.ContentType = value
 			} else {
+
 				if s.pairPolicy.All || s.pairPolicy.Write || s.pairPolicy.WriteContentType {
 					return nil, services.NewPairUnsupportedError(v)
 				}
+
 			}
 		case "storage_class":
 			value, ok := s.convertWriteStorageClass(v.Value.(string))
@@ -340,14 +375,18 @@ func (s *Storage) parsePairStorageWrite(opts []Pair) (*pairStorageWrite, error) 
 				result.HasStorageClass = true
 				result.StorageClass = value
 			} else {
+
 				if s.pairPolicy.All || s.pairPolicy.Write || s.pairPolicy.WriteStorageClass {
 					return nil, services.NewPairUnsupportedError(v)
 				}
+
 			}
 		default:
+
 			if s.pairPolicy.All || s.pairPolicy.Write {
 				return nil, services.NewPairUnsupportedError(v)
 			}
+
 		}
 	}
 

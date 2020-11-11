@@ -40,7 +40,8 @@ test:
 	@echo "ok"
 
 tidy:
-	@go run github.com/aos-dev/go-dev-tools/cmd/tidy
+	@go mod tidy
+	@go mod verify
 
 clean:
 	@echo "clean generated files"
