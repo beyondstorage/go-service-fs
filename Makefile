@@ -33,14 +33,16 @@ build: generate tidy check
 	@go build ./...
 	@echo "ok"
 
-test:
-	@echo "run test"
-	@go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
-	@go tool cover -html="coverage.txt" -o "coverage.html"
-	@echo "ok"
+unit_test:
+	go test -race -coverprofile=coverage.txt -covermode=atomic -v .
+	go tool cover -html="coverage.txt" -o "coverage.html"
+
+integration_test:
+	go test -tags integration_test -race -covermode=atomic -v ./tests
 
 tidy:
-	@go run github.com/aos-dev/go-dev-tools/cmd/tidy
+	@go mod tidy
+	@go mod verify
 
 clean:
 	@echo "clean generated files"
