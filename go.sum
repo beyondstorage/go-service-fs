@@ -5,8 +5,8 @@ github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki
 github.com/aos-dev/go-integration-test/v2 v2.0.0-20201030072349-1418884fad78 h1:s/rzb/Zsilm/DOUjlgHNwBo9fByRsTGNCEh/T/uhI0c=
 github.com/aos-dev/go-integration-test/v2 v2.0.0-20201030072349-1418884fad78/go.mod h1:NfmZvOzPY/WaTXz7t7+/LaBecD/rvZWZKaQWR5oTQBg=
 github.com/aos-dev/go-storage/v2 v2.0.0-20201030030412-57f6d503c7c7/go.mod h1:eHpnrdrHP8mMoT1XdPcd7WRYtJKAYIcHmd2MhMO6l9E=
-github.com/aos-dev/go-storage/v2 v2.0.0-beta.0.20201110102626-a6d936ef2976 h1:0oFznhj/u7pzdBA89Omp/NxhfJoKqV5h3h3tEtsfSVw=
-github.com/aos-dev/go-storage/v2 v2.0.0-beta.0.20201110102626-a6d936ef2976/go.mod h1:a9oqOqLBsKkgep91ZF1bicbpAodOWtbPs3sAtaScbk8=
+github.com/aos-dev/go-storage/v2 v2.0.0 h1:7o2f1hz8vWSTAV1dH1l/qo8e75wzeP1ZiRPr3TP5DD0=
+github.com/aos-dev/go-storage/v2 v2.0.0/go.mod h1:a9oqOqLBsKkgep91ZF1bicbpAodOWtbPs3sAtaScbk8=
 github.com/apparentlymart/go-dump v0.0.0-20180507223929-23540a00eaa3/go.mod h1:oL81AME2rN47vu18xqj1S1jPIPuN7afo62yKTNn3XMM=
 github.com/apparentlymart/go-textseg v1.0.0 h1:rRmlIsPEEhUTIKQb7T++Nz/A5Q6C9IuX2wFoYVvnCs0=
 github.com/apparentlymart/go-textseg v1.0.0/go.mod h1:z96Txxhf3xSFMPmb5X/1W05FF/Nj9VFpLOpjS5yuumk=
