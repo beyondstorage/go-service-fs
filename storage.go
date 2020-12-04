@@ -2,7 +2,9 @@ package fs
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -200,4 +202,25 @@ func (s *Storage) move(ctx context.Context, src string, dst string, opt *pairSto
 		return err
 	}
 	return
+}
+func (s *Storage) fetch(ctx context.Context, path string, url string, opt *pairStorageFetch) (err error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	// TODO: Use go-storage http client instead
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("fetch from url %s expected %d, but got %d", url, http.StatusOK, resp.StatusCode)
+	}
+	_, err = s.WriteWithContext(ctx, path, resp.Body)
+	if err != nil {
+		return err
+	}
+	return nil
 }
