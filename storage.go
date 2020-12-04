@@ -208,6 +208,7 @@ func (s *Storage) fetch(ctx context.Context, path string, url string, opt *pairS
 	if err != nil {
 		return err
 	}
+	// TODO: Use go-storage http client instead
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
