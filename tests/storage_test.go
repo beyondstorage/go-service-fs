@@ -5,7 +5,7 @@ package tests
 import (
 	"testing"
 
-	tests "github.com/aos-dev/go-integration-test/v2"
+	tests "github.com/aos-dev/go-integration-test/v3"
 )
 
 func TestStorage(t *testing.T) {
