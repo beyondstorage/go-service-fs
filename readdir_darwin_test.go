@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/aos-dev/go-storage/v2/types"
+	"github.com/aos-dev/go-storage/v3/types"
 )
 
 func fsReaddir(b *testing.B) {

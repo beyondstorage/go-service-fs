@@ -6,7 +6,7 @@ import (
 	"path"
 	"path/filepath"
 
-	typ "github.com/aos-dev/go-storage/v2/types"
+	typ "github.com/aos-dev/go-storage/v3/types"
 	"golang.org/x/sys/windows"
 )
 
@@ -52,21 +52,19 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 		// Always keep service original name as ID.
 		o.SetID(filepath.Join(input.rp, name))
 		// Object's name should always be separated by slash (/)
-		o.SetName(path.Join(input.dir, name))
+		o.SetPath(path.Join(input.dir, name))
 
 		o.SetSize(int64(data.FileSizeHigh)<<32 + int64(data.FileSizeLow))
 
 		switch {
 		case data.FileAttributes&windows.FILE_ATTRIBUTE_DIRECTORY != 0:
-			o.SetType(typ.ObjectTypeDir)
+			o.Mode |= typ.ModeDir
 		case data.FileAttributes&windows.FILE_ATTRIBUTE_NORMAL != 0:
-			o.SetType(typ.ObjectTypeFile)
+			o.Mode |= typ.ModeRead | typ.ModePage | typ.ModeAppend
 		case data.FileAttributes&windows.FILE_ATTRIBUTE_REPARSE_POINT != 0:
 			// FILE_ATTRIBUTE_REPARSE_POINT means this is a file or directory that has
 			// an associated reparse point, or a file that is a symbolic link.
-			o.SetType(typ.ObjectTypeLink)
-		default:
-			o.SetType(typ.ObjectTypeUnknown)
+			o.Mode |= typ.ModeLink
 		}
 		page.Data = append(page.Data, o)
 
