@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	fs "github.com/aos-dev/go-service-fs"
-	ps "github.com/aos-dev/go-storage/v2/pairs"
-	"github.com/aos-dev/go-storage/v2/types"
+	ps "github.com/aos-dev/go-storage/v3/pairs"
+	"github.com/aos-dev/go-storage/v3/types"
 )
 
 func setupTest(t *testing.T) types.Storager {

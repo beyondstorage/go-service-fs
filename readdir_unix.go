@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	typ "github.com/aos-dev/go-storage/v2/types"
+	typ "github.com/aos-dev/go-storage/v3/types"
 )
 
 // Available value for Dirent Type
@@ -131,21 +131,19 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 		// Always keep service original name as ID.
 		o.ID = filepath.Join(input.rp, fname)
 		// Object's name should always be separated by slash (/)
-		o.Name = path.Join(input.dir, fname)
+		o.Path = path.Join(input.dir, fname)
 
 		switch ty {
 		case DirentTypeDirectory:
-			o.Type = typ.ObjectTypeDir
+			o.Mode |= typ.ModeDir
 		case DirentTypeRegular:
-			o.Type = typ.ObjectTypeFile
+			o.Mode |= typ.ModeRead | typ.ModeAppend | typ.ModePage
 		case DirentTypeLink:
-			o.Type = typ.ObjectTypeLink
-		default:
-			o.Type = typ.ObjectTypeUnknown
+			o.Mode |= typ.ModeLink
 		}
 
 		// Set update name here.
-		input.continuationToken = o.Name
+		input.continuationToken = o.Path
 		page.Data = append(page.Data, o)
 	}
 

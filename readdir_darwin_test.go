@@ -4,13 +4,13 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/aos-dev/go-storage/v2/types"
+	"github.com/aos-dev/go-storage/v3/types"
 )
 
 func fsReaddir(b *testing.B) {
 	s, _ := newStorager()
 
-	it, err := s.ListDir("/usr/lib")
+	it, err := s.List("/usr/lib")
 	if err != nil {
 		b.Error(err)
 	}
@@ -33,7 +33,7 @@ func osReaddir(b *testing.B) {
 func TestGetFilesFs(t *testing.T) {
 	s, _ := newStorager()
 
-	it, err := s.ListDir("/usr/lib")
+	it, err := s.List("/usr/lib")
 	if err != nil {
 		t.Error(err)
 	}

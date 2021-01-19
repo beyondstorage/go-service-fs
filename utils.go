@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/aos-dev/go-storage/v2/pkg/httpclient"
-	"github.com/aos-dev/go-storage/v2/services"
-	typ "github.com/aos-dev/go-storage/v2/types"
+	"github.com/aos-dev/go-storage/v3/pkg/httpclient"
+	"github.com/aos-dev/go-storage/v3/services"
+	typ "github.com/aos-dev/go-storage/v3/types"
 )
 
 // Std{in/out/err} support

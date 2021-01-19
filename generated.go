@@ -5,15 +5,15 @@ import (
 	"context"
 	"io"
 
-	"github.com/aos-dev/go-storage/v2/pkg/credential"
-	"github.com/aos-dev/go-storage/v2/pkg/endpoint"
-	"github.com/aos-dev/go-storage/v2/pkg/httpclient"
-	"github.com/aos-dev/go-storage/v2/services"
-	. "github.com/aos-dev/go-storage/v2/types"
+	"github.com/aos-dev/go-storage/v3/pkg/credential"
+	"github.com/aos-dev/go-storage/v3/pkg/endpoint"
+	"github.com/aos-dev/go-storage/v3/pkg/httpclient"
+	"github.com/aos-dev/go-storage/v3/services"
+	. "github.com/aos-dev/go-storage/v3/types"
 )
 
 var _ credential.Provider
-var _ endpoint.Provider
+var _ endpoint.Value
 var _ Storager
 var _ services.ServiceError
 var _ httpclient.Options
@@ -156,20 +156,22 @@ func (s *Storage) parsePairStorageFetch(opts []Pair) (*pairStorageFetch, error) 
 	return result, nil
 }
 
-// pairStorageListDir is the parsed struct
-type pairStorageListDir struct {
+// pairStorageList is the parsed struct
+type pairStorageList struct {
 	pairs []Pair
 
 	// Required pairs
 	// Optional pairs
 	HasContinuationToken bool
 	ContinuationToken    string
+	HasListMode          bool
+	ListMode             ListMode
 	// Generated pairs
 }
 
-// parsePairStorageListDir will parse Pair slice into *pairStorageListDir
-func (s *Storage) parsePairStorageListDir(opts []Pair) (*pairStorageListDir, error) {
-	result := &pairStorageListDir{
+// parsePairStorageList will parse Pair slice into *pairStorageList
+func (s *Storage) parsePairStorageList(opts []Pair) (*pairStorageList, error) {
+	result := &pairStorageList{
 		pairs: opts,
 	}
 
@@ -180,10 +182,13 @@ func (s *Storage) parsePairStorageListDir(opts []Pair) (*pairStorageListDir, err
 		case "continuation_token":
 			result.HasContinuationToken = true
 			result.ContinuationToken = v.Value.(string)
+		case "list_mode":
+			result.HasListMode = true
+			result.ListMode = v.Value.(ListMode)
 		// Generated pairs
 		default:
 
-			if s.pairPolicy.All || s.pairPolicy.ListDir {
+			if s.pairPolicy.All || s.pairPolicy.List {
 				return nil, services.NewPairUnsupportedError(v)
 			}
 
@@ -263,12 +268,12 @@ type pairStorageRead struct {
 
 	// Required pairs
 	// Optional pairs
-	HasOffset           bool
-	Offset              int64
-	HasReadCallbackFunc bool
-	ReadCallbackFunc    func([]byte)
-	HasSize             bool
-	Size                int64
+	HasIoCallback bool
+	IoCallback    func([]byte)
+	HasOffset     bool
+	Offset        int64
+	HasSize       bool
+	Size          int64
 	// Generated pairs
 }
 
@@ -282,12 +287,12 @@ func (s *Storage) parsePairStorageRead(opts []Pair) (*pairStorageRead, error) {
 		switch v.Key {
 		// Required pairs
 		// Optional pairs
+		case "io_callback":
+			result.HasIoCallback = true
+			result.IoCallback = v.Value.(func([]byte))
 		case "offset":
 			result.HasOffset = true
 			result.Offset = v.Value.(int64)
-		case "read_callback_func":
-			result.HasReadCallbackFunc = true
-			result.ReadCallbackFunc = v.Value.(func([]byte))
 		case "size":
 			result.HasSize = true
 			result.Size = v.Value.(int64)
@@ -342,19 +347,17 @@ type pairStorageWrite struct {
 
 	// Required pairs
 	// Optional pairs
-	HasOffset           bool
-	Offset              int64
-	HasReadCallbackFunc bool
-	ReadCallbackFunc    func([]byte)
-	HasSize             bool
-	Size                int64
-	// Generated pairs
 	HasContentMd5   bool
 	ContentMd5      string
 	HasContentType  bool
 	ContentType     string
+	HasIoCallback   bool
+	IoCallback      func([]byte)
+	HasOffset       bool
+	Offset          int64
 	HasStorageClass bool
 	StorageClass    string
+	// Generated pairs
 }
 
 // parsePairStorageWrite will parse Pair slice into *pairStorageWrite
@@ -367,52 +370,22 @@ func (s *Storage) parsePairStorageWrite(opts []Pair) (*pairStorageWrite, error) 
 		switch v.Key {
 		// Required pairs
 		// Optional pairs
+		case "content_md5":
+			result.HasContentMd5 = true
+			result.ContentMd5 = v.Value.(string)
+		case "content_type":
+			result.HasContentType = true
+			result.ContentType = v.Value.(string)
+		case "io_callback":
+			result.HasIoCallback = true
+			result.IoCallback = v.Value.(func([]byte))
 		case "offset":
 			result.HasOffset = true
 			result.Offset = v.Value.(int64)
-		case "read_callback_func":
-			result.HasReadCallbackFunc = true
-			result.ReadCallbackFunc = v.Value.(func([]byte))
-		case "size":
-			result.HasSize = true
-			result.Size = v.Value.(int64)
-		// Generated pairs
-		case "content_md5":
-			value, ok := s.convertWriteContentMd5(v.Value.(string))
-			if ok {
-				result.HasContentMd5 = true
-				result.ContentMd5 = value
-			} else {
-
-				if s.pairPolicy.All || s.pairPolicy.Write || s.pairPolicy.WriteContentMd5 {
-					return nil, services.NewPairUnsupportedError(v)
-				}
-
-			}
-		case "content_type":
-			value, ok := s.convertWriteContentType(v.Value.(string))
-			if ok {
-				result.HasContentType = true
-				result.ContentType = value
-			} else {
-
-				if s.pairPolicy.All || s.pairPolicy.Write || s.pairPolicy.WriteContentType {
-					return nil, services.NewPairUnsupportedError(v)
-				}
-
-			}
 		case "storage_class":
-			value, ok := s.convertWriteStorageClass(v.Value.(string))
-			if ok {
-				result.HasStorageClass = true
-				result.StorageClass = value
-			} else {
-
-				if s.pairPolicy.All || s.pairPolicy.Write || s.pairPolicy.WriteStorageClass {
-					return nil, services.NewPairUnsupportedError(v)
-				}
-
-			}
+			result.HasStorageClass = true
+			result.StorageClass = v.Value.(string)
+		// Generated pairs
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.Write {
@@ -491,29 +464,29 @@ func (s *Storage) FetchWithContext(ctx context.Context, path string, url string,
 	return s.fetch(ctx, path, url, opt)
 }
 
-// ListDir will return list a specific dir.
+// List will return list a specific path.
 //
 // This function will create a context by default.
-func (s *Storage) ListDir(dir string, pairs ...Pair) (oi *ObjectIterator, err error) {
+func (s *Storage) List(path string, pairs ...Pair) (oi *ObjectIterator, err error) {
 	ctx := context.Background()
-	return s.ListDirWithContext(ctx, dir, pairs...)
+	return s.ListWithContext(ctx, path, pairs...)
 }
 
-// ListDirWithContext will return list a specific dir.
-func (s *Storage) ListDirWithContext(ctx context.Context, dir string, pairs ...Pair) (oi *ObjectIterator, err error) {
+// ListWithContext will return list a specific path.
+func (s *Storage) ListWithContext(ctx context.Context, path string, pairs ...Pair) (oi *ObjectIterator, err error) {
 	defer func() {
-		err = s.formatError("list_dir", err, dir)
+		err = s.formatError("list", err, path)
 	}()
-	var opt *pairStorageListDir
-	opt, err = s.parsePairStorageListDir(pairs)
+	var opt *pairStorageList
+	opt, err = s.parsePairStorageList(pairs)
 	if err != nil {
 		return
 	}
 
-	return s.listDir(ctx, dir, opt)
+	return s.list(ctx, path, opt)
 }
 
-// Metadata will return current storager's metadata.
+// Metadata will return current storager metadata.
 //
 // This function will create a context by default.
 func (s *Storage) Metadata(pairs ...Pair) (meta *StorageMeta, err error) {
@@ -521,7 +494,7 @@ func (s *Storage) Metadata(pairs ...Pair) (meta *StorageMeta, err error) {
 	return s.MetadataWithContext(ctx, pairs...)
 }
 
-// MetadataWithContext will return current storager's metadata.
+// MetadataWithContext will return current storager metadata.
 func (s *Storage) MetadataWithContext(ctx context.Context, pairs ...Pair) (meta *StorageMeta, err error) {
 	defer func() {
 		err = s.formatError("metadata", err)
@@ -604,13 +577,13 @@ func (s *Storage) StatWithContext(ctx context.Context, path string, pairs ...Pai
 // Write will write data into a file.
 //
 // This function will create a context by default.
-func (s *Storage) Write(path string, r io.Reader, pairs ...Pair) (n int64, err error) {
+func (s *Storage) Write(path string, r io.Reader, size int64, pairs ...Pair) (n int64, err error) {
 	ctx := context.Background()
-	return s.WriteWithContext(ctx, path, r, pairs...)
+	return s.WriteWithContext(ctx, path, r, size, pairs...)
 }
 
 // WriteWithContext will write data into a file.
-func (s *Storage) WriteWithContext(ctx context.Context, path string, r io.Reader, pairs ...Pair) (n int64, err error) {
+func (s *Storage) WriteWithContext(ctx context.Context, path string, r io.Reader, size int64, pairs ...Pair) (n int64, err error) {
 	defer func() {
 		err = s.formatError("write", err, path)
 	}()
@@ -620,5 +593,5 @@ func (s *Storage) WriteWithContext(ctx context.Context, path string, r io.Reader
 		return
 	}
 
-	return s.write(ctx, path, r, opt)
+	return s.write(ctx, path, r, size, opt)
 }
