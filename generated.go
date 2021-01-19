@@ -124,6 +124,38 @@ func (s *Storage) parsePairStorageDelete(opts []Pair) (*pairStorageDelete, error
 	return result, nil
 }
 
+// pairStorageFetch is the parsed struct
+type pairStorageFetch struct {
+	pairs []Pair
+
+	// Required pairs
+	// Optional pairs
+	// Generated pairs
+}
+
+// parsePairStorageFetch will parse Pair slice into *pairStorageFetch
+func (s *Storage) parsePairStorageFetch(opts []Pair) (*pairStorageFetch, error) {
+	result := &pairStorageFetch{
+		pairs: opts,
+	}
+
+	for _, v := range opts {
+		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		// Generated pairs
+		default:
+
+			if s.pairPolicy.All || s.pairPolicy.Fetch {
+				return nil, services.NewPairUnsupportedError(v)
+			}
+
+		}
+	}
+
+	return result, nil
+}
+
 // pairStorageList is the parsed struct
 type pairStorageList struct {
 	pairs []Pair
@@ -408,6 +440,28 @@ func (s *Storage) DeleteWithContext(ctx context.Context, path string, pairs ...P
 	}
 
 	return s.delete(ctx, path, opt)
+}
+
+// Fetch will fetch from a given url to path.
+//
+// This function will create a context by default.
+func (s *Storage) Fetch(path string, url string, pairs ...Pair) (err error) {
+	ctx := context.Background()
+	return s.FetchWithContext(ctx, path, url, pairs...)
+}
+
+// FetchWithContext will fetch from a given url to path.
+func (s *Storage) FetchWithContext(ctx context.Context, path string, url string, pairs ...Pair) (err error) {
+	defer func() {
+		err = s.formatError("fetch", err, path, url)
+	}()
+	var opt *pairStorageFetch
+	opt, err = s.parsePairStorageFetch(pairs)
+	if err != nil {
+		return
+	}
+
+	return s.fetch(ctx, path, url, opt)
 }
 
 // List will return list a specific path.

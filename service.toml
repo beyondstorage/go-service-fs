@@ -1,7 +1,7 @@
 name = "fs"
 
 [namespace.storage]
-implement = ["copier", "mover"]
+implement = ["copier", "mover","fetcher"]
 
 [namespace.storage.new]
 optional = ["pair_policy", "work_dir"]
