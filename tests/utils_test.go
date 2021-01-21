@@ -5,7 +5,7 @@ package tests
 import (
 	"testing"
 
-	fs "github.com/aos-dev/go-service-fs"
+	fs "github.com/aos-dev/go-service-fs/v2"
 	ps "github.com/aos-dev/go-storage/v3/pairs"
 	"github.com/aos-dev/go-storage/v3/types"
 )
