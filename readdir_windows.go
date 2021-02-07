@@ -54,7 +54,7 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 		// Object's name should always be separated by slash (/)
 		o.SetPath(path.Join(input.dir, name))
 
-		o.SetSize(int64(data.FileSizeHigh)<<32 + int64(data.FileSizeLow))
+		o.SetContentLength(int64(data.FileSizeHigh)<<32 + int64(data.FileSizeLow))
 
 		switch {
 		case data.FileAttributes&windows.FILE_ATTRIBUTE_DIRECTORY != 0:
