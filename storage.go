@@ -182,8 +182,8 @@ func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (
 	if fi.Mode().IsRegular() {
 		o.Mode |= ModeRead | ModePage | ModeAppend
 
-		o.SetSize(fi.Size())
-		o.SetUpdatedAt(fi.ModTime())
+		o.SetContentLength(fi.Size())
+		o.SetLastModified(fi.ModTime())
 
 		if v := mime.DetectFilePath(path); v != "" {
 			o.SetContentType(v)
