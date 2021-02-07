@@ -24,6 +24,9 @@ const Type = "fs"
 // Service available pairs.
 const ()
 
+// Service available metadata.
+const ()
+
 // pairStorageNew is the parsed struct
 type pairStorageNew struct {
 	pairs []Pair
@@ -347,16 +350,14 @@ type pairStorageWrite struct {
 
 	// Required pairs
 	// Optional pairs
-	HasContentMd5   bool
-	ContentMd5      string
-	HasContentType  bool
-	ContentType     string
-	HasIoCallback   bool
-	IoCallback      func([]byte)
-	HasOffset       bool
-	Offset          int64
-	HasStorageClass bool
-	StorageClass    string
+	HasContentMd5  bool
+	ContentMd5     string
+	HasContentType bool
+	ContentType    string
+	HasIoCallback  bool
+	IoCallback     func([]byte)
+	HasOffset      bool
+	Offset         int64
 	// Generated pairs
 }
 
@@ -382,9 +383,6 @@ func (s *Storage) parsePairStorageWrite(opts []Pair) (*pairStorageWrite, error) 
 		case "offset":
 			result.HasOffset = true
 			result.Offset = v.Value.(int64)
-		case "storage_class":
-			result.HasStorageClass = true
-			result.StorageClass = v.Value.(string)
 		// Generated pairs
 		default:
 
