@@ -22,10 +22,22 @@ var _ httpclient.Options
 const Type = "fs"
 
 // Service available pairs.
-const ()
+const (
+	// DefaultStoragePairs set default pairs for storager actions
+	pairDefaultStoragePairs = "fs_default_storage_pairs"
+)
 
 // Service available metadata.
 const ()
+
+// WithDefaultStoragePairs will apply default_storage_pairs value to Options
+// DefaultStoragePairs set default pairs for storager actions
+func WithDefaultStoragePairs(v DefaultStoragePairs) Pair {
+	return Pair{
+		Key:   pairDefaultStoragePairs,
+		Value: v,
+	}
+}
 
 // pairStorageNew is the parsed struct
 type pairStorageNew struct {
@@ -33,16 +45,18 @@ type pairStorageNew struct {
 
 	// Required pairs
 	// Optional pairs
-	HasPairPolicy bool
-	PairPolicy    PairPolicy
-	HasWorkDir    bool
-	WorkDir       string
+	HasDefaultStoragePairs bool
+	DefaultStoragePairs    DefaultStoragePairs
+	HasPairPolicy          bool
+	PairPolicy             PairPolicy
+	HasWorkDir             bool
+	WorkDir                string
 	// Generated pairs
 }
 
 // parsePairStorageNew will parse Pair slice into *pairStorageNew
-func parsePairStorageNew(opts []Pair) (*pairStorageNew, error) {
-	result := &pairStorageNew{
+func parsePairStorageNew(opts []Pair) (pairStorageNew, error) {
+	result := pairStorageNew{
 		pairs: opts,
 	}
 
@@ -50,10 +64,22 @@ func parsePairStorageNew(opts []Pair) (*pairStorageNew, error) {
 		switch v.Key {
 		// Required pairs
 		// Optional pairs
+		case pairDefaultStoragePairs:
+			if result.HasDefaultStoragePairs {
+				continue
+			}
+			result.HasDefaultStoragePairs = true
+			result.DefaultStoragePairs = v.Value.(DefaultStoragePairs)
 		case "pair_policy":
+			if result.HasPairPolicy {
+				continue
+			}
 			result.HasPairPolicy = true
 			result.PairPolicy = v.Value.(PairPolicy)
 		case "work_dir":
+			if result.HasWorkDir {
+				continue
+			}
 			result.HasWorkDir = true
 			result.WorkDir = v.Value.(string)
 			// Generated pairs
@@ -61,6 +87,19 @@ func parsePairStorageNew(opts []Pair) (*pairStorageNew, error) {
 	}
 
 	return result, nil
+}
+
+// DefaultStoragePairs is default pairs for specific action
+type DefaultStoragePairs struct {
+	Copy     []Pair
+	Delete   []Pair
+	Fetch    []Pair
+	List     []Pair
+	Metadata []Pair
+	Move     []Pair
+	Read     []Pair
+	Stat     []Pair
+	Write    []Pair
 }
 
 // pairStorageCopy is the parsed struct
@@ -73,8 +112,8 @@ type pairStorageCopy struct {
 }
 
 // parsePairStorageCopy will parse Pair slice into *pairStorageCopy
-func (s *Storage) parsePairStorageCopy(opts []Pair) (*pairStorageCopy, error) {
-	result := &pairStorageCopy{
+func (s *Storage) parsePairStorageCopy(opts []Pair) (pairStorageCopy, error) {
+	result := pairStorageCopy{
 		pairs: opts,
 	}
 
@@ -86,7 +125,7 @@ func (s *Storage) parsePairStorageCopy(opts []Pair) (*pairStorageCopy, error) {
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.Copy {
-				return nil, services.NewPairUnsupportedError(v)
+				return pairStorageCopy{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -105,8 +144,8 @@ type pairStorageDelete struct {
 }
 
 // parsePairStorageDelete will parse Pair slice into *pairStorageDelete
-func (s *Storage) parsePairStorageDelete(opts []Pair) (*pairStorageDelete, error) {
-	result := &pairStorageDelete{
+func (s *Storage) parsePairStorageDelete(opts []Pair) (pairStorageDelete, error) {
+	result := pairStorageDelete{
 		pairs: opts,
 	}
 
@@ -118,7 +157,7 @@ func (s *Storage) parsePairStorageDelete(opts []Pair) (*pairStorageDelete, error
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.Delete {
-				return nil, services.NewPairUnsupportedError(v)
+				return pairStorageDelete{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -137,8 +176,8 @@ type pairStorageFetch struct {
 }
 
 // parsePairStorageFetch will parse Pair slice into *pairStorageFetch
-func (s *Storage) parsePairStorageFetch(opts []Pair) (*pairStorageFetch, error) {
-	result := &pairStorageFetch{
+func (s *Storage) parsePairStorageFetch(opts []Pair) (pairStorageFetch, error) {
+	result := pairStorageFetch{
 		pairs: opts,
 	}
 
@@ -150,7 +189,7 @@ func (s *Storage) parsePairStorageFetch(opts []Pair) (*pairStorageFetch, error) 
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.Fetch {
-				return nil, services.NewPairUnsupportedError(v)
+				return pairStorageFetch{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -173,8 +212,8 @@ type pairStorageList struct {
 }
 
 // parsePairStorageList will parse Pair slice into *pairStorageList
-func (s *Storage) parsePairStorageList(opts []Pair) (*pairStorageList, error) {
-	result := &pairStorageList{
+func (s *Storage) parsePairStorageList(opts []Pair) (pairStorageList, error) {
+	result := pairStorageList{
 		pairs: opts,
 	}
 
@@ -192,7 +231,7 @@ func (s *Storage) parsePairStorageList(opts []Pair) (*pairStorageList, error) {
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.List {
-				return nil, services.NewPairUnsupportedError(v)
+				return pairStorageList{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -211,8 +250,8 @@ type pairStorageMetadata struct {
 }
 
 // parsePairStorageMetadata will parse Pair slice into *pairStorageMetadata
-func (s *Storage) parsePairStorageMetadata(opts []Pair) (*pairStorageMetadata, error) {
-	result := &pairStorageMetadata{
+func (s *Storage) parsePairStorageMetadata(opts []Pair) (pairStorageMetadata, error) {
+	result := pairStorageMetadata{
 		pairs: opts,
 	}
 
@@ -224,7 +263,7 @@ func (s *Storage) parsePairStorageMetadata(opts []Pair) (*pairStorageMetadata, e
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.Metadata {
-				return nil, services.NewPairUnsupportedError(v)
+				return pairStorageMetadata{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -243,8 +282,8 @@ type pairStorageMove struct {
 }
 
 // parsePairStorageMove will parse Pair slice into *pairStorageMove
-func (s *Storage) parsePairStorageMove(opts []Pair) (*pairStorageMove, error) {
-	result := &pairStorageMove{
+func (s *Storage) parsePairStorageMove(opts []Pair) (pairStorageMove, error) {
+	result := pairStorageMove{
 		pairs: opts,
 	}
 
@@ -256,7 +295,7 @@ func (s *Storage) parsePairStorageMove(opts []Pair) (*pairStorageMove, error) {
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.Move {
-				return nil, services.NewPairUnsupportedError(v)
+				return pairStorageMove{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -281,8 +320,8 @@ type pairStorageRead struct {
 }
 
 // parsePairStorageRead will parse Pair slice into *pairStorageRead
-func (s *Storage) parsePairStorageRead(opts []Pair) (*pairStorageRead, error) {
-	result := &pairStorageRead{
+func (s *Storage) parsePairStorageRead(opts []Pair) (pairStorageRead, error) {
+	result := pairStorageRead{
 		pairs: opts,
 	}
 
@@ -303,7 +342,7 @@ func (s *Storage) parsePairStorageRead(opts []Pair) (*pairStorageRead, error) {
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.Read {
-				return nil, services.NewPairUnsupportedError(v)
+				return pairStorageRead{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -322,8 +361,8 @@ type pairStorageStat struct {
 }
 
 // parsePairStorageStat will parse Pair slice into *pairStorageStat
-func (s *Storage) parsePairStorageStat(opts []Pair) (*pairStorageStat, error) {
-	result := &pairStorageStat{
+func (s *Storage) parsePairStorageStat(opts []Pair) (pairStorageStat, error) {
+	result := pairStorageStat{
 		pairs: opts,
 	}
 
@@ -335,7 +374,7 @@ func (s *Storage) parsePairStorageStat(opts []Pair) (*pairStorageStat, error) {
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.Stat {
-				return nil, services.NewPairUnsupportedError(v)
+				return pairStorageStat{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -362,8 +401,8 @@ type pairStorageWrite struct {
 }
 
 // parsePairStorageWrite will parse Pair slice into *pairStorageWrite
-func (s *Storage) parsePairStorageWrite(opts []Pair) (*pairStorageWrite, error) {
-	result := &pairStorageWrite{
+func (s *Storage) parsePairStorageWrite(opts []Pair) (pairStorageWrite, error) {
+	result := pairStorageWrite{
 		pairs: opts,
 	}
 
@@ -387,7 +426,7 @@ func (s *Storage) parsePairStorageWrite(opts []Pair) (*pairStorageWrite, error) 
 		default:
 
 			if s.pairPolicy.All || s.pairPolicy.Write {
-				return nil, services.NewPairUnsupportedError(v)
+				return pairStorageWrite{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -409,7 +448,8 @@ func (s *Storage) CopyWithContext(ctx context.Context, src string, dst string, p
 	defer func() {
 		err = s.formatError("copy", err, src, dst)
 	}()
-	var opt *pairStorageCopy
+	pairs = append(pairs, s.defaultPairs.Copy...)
+	var opt pairStorageCopy
 	opt, err = s.parsePairStorageCopy(pairs)
 	if err != nil {
 		return
@@ -431,7 +471,8 @@ func (s *Storage) DeleteWithContext(ctx context.Context, path string, pairs ...P
 	defer func() {
 		err = s.formatError("delete", err, path)
 	}()
-	var opt *pairStorageDelete
+	pairs = append(pairs, s.defaultPairs.Delete...)
+	var opt pairStorageDelete
 	opt, err = s.parsePairStorageDelete(pairs)
 	if err != nil {
 		return
@@ -453,7 +494,8 @@ func (s *Storage) FetchWithContext(ctx context.Context, path string, url string,
 	defer func() {
 		err = s.formatError("fetch", err, path, url)
 	}()
-	var opt *pairStorageFetch
+	pairs = append(pairs, s.defaultPairs.Fetch...)
+	var opt pairStorageFetch
 	opt, err = s.parsePairStorageFetch(pairs)
 	if err != nil {
 		return
@@ -475,7 +517,8 @@ func (s *Storage) ListWithContext(ctx context.Context, path string, pairs ...Pai
 	defer func() {
 		err = s.formatError("list", err, path)
 	}()
-	var opt *pairStorageList
+	pairs = append(pairs, s.defaultPairs.List...)
+	var opt pairStorageList
 	opt, err = s.parsePairStorageList(pairs)
 	if err != nil {
 		return
@@ -497,7 +540,8 @@ func (s *Storage) MetadataWithContext(ctx context.Context, pairs ...Pair) (meta 
 	defer func() {
 		err = s.formatError("metadata", err)
 	}()
-	var opt *pairStorageMetadata
+	pairs = append(pairs, s.defaultPairs.Metadata...)
+	var opt pairStorageMetadata
 	opt, err = s.parsePairStorageMetadata(pairs)
 	if err != nil {
 		return
@@ -519,7 +563,8 @@ func (s *Storage) MoveWithContext(ctx context.Context, src string, dst string, p
 	defer func() {
 		err = s.formatError("move", err, src, dst)
 	}()
-	var opt *pairStorageMove
+	pairs = append(pairs, s.defaultPairs.Move...)
+	var opt pairStorageMove
 	opt, err = s.parsePairStorageMove(pairs)
 	if err != nil {
 		return
@@ -541,7 +586,8 @@ func (s *Storage) ReadWithContext(ctx context.Context, path string, w io.Writer,
 	defer func() {
 		err = s.formatError("read", err, path)
 	}()
-	var opt *pairStorageRead
+	pairs = append(pairs, s.defaultPairs.Read...)
+	var opt pairStorageRead
 	opt, err = s.parsePairStorageRead(pairs)
 	if err != nil {
 		return
@@ -563,7 +609,8 @@ func (s *Storage) StatWithContext(ctx context.Context, path string, pairs ...Pai
 	defer func() {
 		err = s.formatError("stat", err, path)
 	}()
-	var opt *pairStorageStat
+	pairs = append(pairs, s.defaultPairs.Stat...)
+	var opt pairStorageStat
 	opt, err = s.parsePairStorageStat(pairs)
 	if err != nil {
 		return
@@ -585,7 +632,8 @@ func (s *Storage) WriteWithContext(ctx context.Context, path string, r io.Reader
 	defer func() {
 		err = s.formatError("write", err, path)
 	}()
-	var opt *pairStorageWrite
+	pairs = append(pairs, s.defaultPairs.Write...)
+	var opt pairStorageWrite
 	opt, err = s.parsePairStorageWrite(pairs)
 	if err != nil {
 		return
