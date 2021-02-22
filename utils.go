@@ -22,7 +22,8 @@ type Storage struct {
 	// options for this storager.
 	workDir string // workDir dir for all operation.
 
-	pairPolicy typ.PairPolicy
+	defaultPairs DefaultStoragePairs
+	pairPolicy   typ.PairPolicy
 }
 
 // String implements Storager.String
@@ -51,11 +52,14 @@ func newStorager(pairs ...typ.Pair) (store *Storage, err error) {
 		workDir: "/",
 	}
 
-	if opt.HasWorkDir {
-		store.workDir = opt.WorkDir
+	if opt.HasDefaultStoragePairs {
+		store.defaultPairs = opt.DefaultStoragePairs
 	}
 	if opt.HasPairPolicy {
 		store.pairPolicy = opt.PairPolicy
+	}
+	if opt.HasWorkDir {
+		store.workDir = opt.WorkDir
 	}
 
 	// Check and create work dir

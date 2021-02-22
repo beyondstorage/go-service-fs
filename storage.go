@@ -14,7 +14,7 @@ import (
 	. "github.com/aos-dev/go-storage/v3/types"
 )
 
-func (s *Storage) delete(ctx context.Context, path string, opt *pairStorageDelete) (err error) {
+func (s *Storage) delete(ctx context.Context, path string, opt pairStorageDelete) (err error) {
 	rp := s.getAbsPath(path)
 
 	err = os.Remove(rp)
@@ -39,7 +39,7 @@ func (input *listDirInput) ContinuationToken() string {
 	return input.continuationToken
 }
 
-func (s *Storage) copy(ctx context.Context, src string, dst string, opt *pairStorageCopy) (err error) {
+func (s *Storage) copy(ctx context.Context, src string, dst string, opt pairStorageCopy) (err error) {
 	rs := s.getAbsPath(src)
 	rd := s.getAbsPath(dst)
 
@@ -62,7 +62,7 @@ func (s *Storage) copy(ctx context.Context, src string, dst string, opt *pairSto
 	return
 }
 
-func (s *Storage) fetch(ctx context.Context, path string, url string, opt *pairStorageFetch) (err error) {
+func (s *Storage) fetch(ctx context.Context, path string, url string, opt pairStorageFetch) (err error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return err
@@ -84,7 +84,7 @@ func (s *Storage) fetch(ctx context.Context, path string, url string, opt *pairS
 	return nil
 }
 
-func (s *Storage) list(ctx context.Context, path string, opt *pairStorageList) (oi *ObjectIterator, err error) {
+func (s *Storage) list(ctx context.Context, path string, opt pairStorageList) (oi *ObjectIterator, err error) {
 	input := listDirInput{
 		// Always keep service original name as rp.
 		rp: s.getAbsPath(path),
@@ -102,13 +102,13 @@ func (s *Storage) list(ctx context.Context, path string, opt *pairStorageList) (
 	return NewObjectIterator(ctx, s.listDirNext, &input), nil
 }
 
-func (s *Storage) metadata(ctx context.Context, opt *pairStorageMetadata) (meta *StorageMeta, err error) {
+func (s *Storage) metadata(ctx context.Context, opt pairStorageMetadata) (meta *StorageMeta, err error) {
 	meta = NewStorageMeta()
 	meta.WorkDir = s.workDir
 	return meta, nil
 }
 
-func (s *Storage) move(ctx context.Context, src string, dst string, opt *pairStorageMove) (err error) {
+func (s *Storage) move(ctx context.Context, src string, dst string, opt pairStorageMove) (err error) {
 	rs := s.getAbsPath(src)
 	rd := s.getAbsPath(dst)
 
@@ -126,7 +126,7 @@ func (s *Storage) move(ctx context.Context, src string, dst string, opt *pairSto
 	return
 }
 
-func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairStorageRead) (n int64, err error) {
+func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt pairStorageRead) (n int64, err error) {
 	var rc io.ReadCloser
 
 	rp := s.getAbsPath(path)
@@ -162,7 +162,7 @@ func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt *pairS
 	return io.Copy(w, rc)
 }
 
-func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (o *Object, err error) {
+func (s *Storage) stat(ctx context.Context, path string, opt pairStorageStat) (o *Object, err error) {
 	rp := s.getAbsPath(path)
 
 	fi, err := s.statFile(rp)
@@ -204,7 +204,7 @@ func (s *Storage) stat(ctx context.Context, path string, opt *pairStorageStat) (
 	return o, nil
 }
 
-func (s *Storage) write(ctx context.Context, path string, r io.Reader, size int64, opt *pairStorageWrite) (n int64, err error) {
+func (s *Storage) write(ctx context.Context, path string, r io.Reader, size int64, opt pairStorageWrite) (n int64, err error) {
 	var f io.WriteCloser
 
 	rp := s.getAbsPath(path)
