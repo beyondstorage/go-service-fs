@@ -41,3 +41,15 @@ func TestFormatOsError(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkStorage_getAbsPath(b *testing.B) {
+	store := &Storage{
+		workDir: "/abc/def",
+	}
+
+	b.StartTimer()
+	for i := 0; i < b.N; i += 1 {
+		_ = store.getAbsPath("xyz/nml")
+	}
+	b.StopTimer()
+}

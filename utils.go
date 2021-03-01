@@ -4,17 +4,20 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/aos-dev/go-storage/v3/pkg/httpclient"
 	"github.com/aos-dev/go-storage/v3/services"
 	typ "github.com/aos-dev/go-storage/v3/types"
 )
 
-// Std{in/out/err} support
 const (
+	// Std{in/out/err} support
 	Stdin  = "/dev/stdin"
 	Stdout = "/dev/stdout"
 	Stderr = "/dev/stderr"
+
+	PathSeparator = string(filepath.Separator)
 )
 
 // Storage is the fs client.
@@ -126,6 +129,14 @@ func (s *Storage) createFile(absPath string) (f *os.File, err error) {
 	return
 }
 
+func (s *Storage) createDir(absPath string) (err error) {
+	defer func() {
+		err = s.formatError("create_dir", err, absPath)
+	}()
+
+	return os.MkdirAll(absPath, 0755)
+}
+
 func (s *Storage) statFile(absPath string) (fi os.FileInfo, err error) {
 	switch absPath {
 	case Stdin:
@@ -147,7 +158,17 @@ func (s *Storage) getAbsPath(path string) string {
 	if filepath.IsAbs(path) {
 		return path
 	}
-	return filepath.Join(s.workDir, path)
+	absPath := filepath.Join(s.workDir, path)
+
+	// Join will clean the trailing "/", we need to append it back.
+	if strings.HasSuffix(path, PathSeparator) {
+		absPath += PathSeparator
+	}
+	return absPath
+}
+
+func (s *Storage) isDirPath(path string) bool {
+	return strings.HasSuffix(path, PathSeparator)
 }
 
 func (s *Storage) formatError(op string, err error, path ...string) error {

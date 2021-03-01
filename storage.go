@@ -209,6 +209,11 @@ func (s *Storage) write(ctx context.Context, path string, r io.Reader, size int6
 
 	rp := s.getAbsPath(path)
 
+	if s.isDirPath(rp) {
+		// FIXME: Do we need to check r == nil && size == 0 ?
+		return 0, s.createDir(rp)
+	}
+
 	f, err = s.createFile(rp)
 	if err != nil {
 		return
