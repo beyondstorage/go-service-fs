@@ -17,6 +17,7 @@ func TestGetAbsPath(t *testing.T) {
 	}{
 		{"under root", "/", "abc", "/abc"},
 		{"under sub dir", "/root", "abc", "/root/abc"},
+		{"with dir path", "/root", "abc/", "/root/abc/"},
 	}
 
 	for _, tt := range cases {
