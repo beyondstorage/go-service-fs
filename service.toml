@@ -6,6 +6,9 @@ implement = ["copier", "mover","fetcher"]
 [namespace.storage.new]
 optional = ["default_storage_pairs", "pair_policy", "work_dir"]
 
+[namespace.storage.op.create]
+optional = ["multipart_id"]
+
 [namespace.storage.op.list]
 optional = ["continuation_token","list_mode"]
 

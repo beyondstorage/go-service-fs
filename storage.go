@@ -62,6 +62,14 @@ func (s *Storage) copy(ctx context.Context, src string, dst string, opt pairStor
 	return
 }
 
+func (s *Storage) create(path string, opt pairStorageCreate) (o *Object) {
+	o = s.newObject(false)
+	o.ID = filepath.Join(s.workDir, path)
+	o.Path = path
+	o.Mode = ModeRead
+	return o
+}
+
 func (s *Storage) fetch(ctx context.Context, path string, url string, opt pairStorageFetch) (err error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
