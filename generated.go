@@ -92,6 +92,7 @@ func parsePairStorageNew(opts []Pair) (pairStorageNew, error) {
 // DefaultStoragePairs is default pairs for specific action
 type DefaultStoragePairs struct {
 	Copy     []Pair
+	Create   []Pair
 	Delete   []Pair
 	Fetch    []Pair
 	List     []Pair
@@ -126,6 +127,43 @@ func (s *Storage) parsePairStorageCopy(opts []Pair) (pairStorageCopy, error) {
 
 			if s.pairPolicy.All || s.pairPolicy.Copy {
 				return pairStorageCopy{}, services.NewPairUnsupportedError(v)
+			}
+
+		}
+	}
+
+	return result, nil
+}
+
+// pairStorageCreate is the parsed struct
+type pairStorageCreate struct {
+	pairs []Pair
+
+	// Required pairs
+	// Optional pairs
+	HasMultipartID bool
+	MultipartID    string
+	// Generated pairs
+}
+
+// parsePairStorageCreate will parse Pair slice into *pairStorageCreate
+func (s *Storage) parsePairStorageCreate(opts []Pair) (pairStorageCreate, error) {
+	result := pairStorageCreate{
+		pairs: opts,
+	}
+
+	for _, v := range opts {
+		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		case "multipart_id":
+			result.HasMultipartID = true
+			result.MultipartID = v.Value.(string)
+		// Generated pairs
+		default:
+
+			if s.pairPolicy.All || s.pairPolicy.Create {
+				return pairStorageCreate{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -445,17 +483,32 @@ func (s *Storage) Copy(src string, dst string, pairs ...Pair) (err error) {
 
 // CopyWithContext will copy an Object or multiple object in the service.
 func (s *Storage) CopyWithContext(ctx context.Context, src string, dst string, pairs ...Pair) (err error) {
+	pairs = append(pairs, s.defaultPairs.Copy...)
+	var opt pairStorageCopy
+
 	defer func() {
 		err = s.formatError("copy", err, src, dst)
 	}()
-	pairs = append(pairs, s.defaultPairs.Copy...)
-	var opt pairStorageCopy
+
 	opt, err = s.parsePairStorageCopy(pairs)
 	if err != nil {
 		return
 	}
 
 	return s.copy(ctx, src, dst, opt)
+}
+
+// Create will create a new object without any api call.
+//
+// This function will create a context by default.
+func (s *Storage) Create(path string, pairs ...Pair) (o *Object) {
+	pairs = append(pairs, s.defaultPairs.Create...)
+	var opt pairStorageCreate
+
+	// Ignore error while handling local funtions.
+	opt, _ = s.parsePairStorageCreate(pairs)
+
+	return s.create(path, opt)
 }
 
 // Delete will delete an Object from service.
@@ -468,11 +521,13 @@ func (s *Storage) Delete(path string, pairs ...Pair) (err error) {
 
 // DeleteWithContext will delete an Object from service.
 func (s *Storage) DeleteWithContext(ctx context.Context, path string, pairs ...Pair) (err error) {
+	pairs = append(pairs, s.defaultPairs.Delete...)
+	var opt pairStorageDelete
+
 	defer func() {
 		err = s.formatError("delete", err, path)
 	}()
-	pairs = append(pairs, s.defaultPairs.Delete...)
-	var opt pairStorageDelete
+
 	opt, err = s.parsePairStorageDelete(pairs)
 	if err != nil {
 		return
@@ -491,11 +546,13 @@ func (s *Storage) Fetch(path string, url string, pairs ...Pair) (err error) {
 
 // FetchWithContext will fetch from a given url to path.
 func (s *Storage) FetchWithContext(ctx context.Context, path string, url string, pairs ...Pair) (err error) {
+	pairs = append(pairs, s.defaultPairs.Fetch...)
+	var opt pairStorageFetch
+
 	defer func() {
 		err = s.formatError("fetch", err, path, url)
 	}()
-	pairs = append(pairs, s.defaultPairs.Fetch...)
-	var opt pairStorageFetch
+
 	opt, err = s.parsePairStorageFetch(pairs)
 	if err != nil {
 		return
@@ -514,11 +571,13 @@ func (s *Storage) List(path string, pairs ...Pair) (oi *ObjectIterator, err erro
 
 // ListWithContext will return list a specific path.
 func (s *Storage) ListWithContext(ctx context.Context, path string, pairs ...Pair) (oi *ObjectIterator, err error) {
+	pairs = append(pairs, s.defaultPairs.List...)
+	var opt pairStorageList
+
 	defer func() {
 		err = s.formatError("list", err, path)
 	}()
-	pairs = append(pairs, s.defaultPairs.List...)
-	var opt pairStorageList
+
 	opt, err = s.parsePairStorageList(pairs)
 	if err != nil {
 		return
@@ -537,11 +596,13 @@ func (s *Storage) Metadata(pairs ...Pair) (meta *StorageMeta, err error) {
 
 // MetadataWithContext will return current storager metadata.
 func (s *Storage) MetadataWithContext(ctx context.Context, pairs ...Pair) (meta *StorageMeta, err error) {
+	pairs = append(pairs, s.defaultPairs.Metadata...)
+	var opt pairStorageMetadata
+
 	defer func() {
 		err = s.formatError("metadata", err)
 	}()
-	pairs = append(pairs, s.defaultPairs.Metadata...)
-	var opt pairStorageMetadata
+
 	opt, err = s.parsePairStorageMetadata(pairs)
 	if err != nil {
 		return
@@ -560,11 +621,13 @@ func (s *Storage) Move(src string, dst string, pairs ...Pair) (err error) {
 
 // MoveWithContext will move an object in the service.
 func (s *Storage) MoveWithContext(ctx context.Context, src string, dst string, pairs ...Pair) (err error) {
+	pairs = append(pairs, s.defaultPairs.Move...)
+	var opt pairStorageMove
+
 	defer func() {
 		err = s.formatError("move", err, src, dst)
 	}()
-	pairs = append(pairs, s.defaultPairs.Move...)
-	var opt pairStorageMove
+
 	opt, err = s.parsePairStorageMove(pairs)
 	if err != nil {
 		return
@@ -583,11 +646,13 @@ func (s *Storage) Read(path string, w io.Writer, pairs ...Pair) (n int64, err er
 
 // ReadWithContext will read the file's data.
 func (s *Storage) ReadWithContext(ctx context.Context, path string, w io.Writer, pairs ...Pair) (n int64, err error) {
+	pairs = append(pairs, s.defaultPairs.Read...)
+	var opt pairStorageRead
+
 	defer func() {
 		err = s.formatError("read", err, path)
 	}()
-	pairs = append(pairs, s.defaultPairs.Read...)
-	var opt pairStorageRead
+
 	opt, err = s.parsePairStorageRead(pairs)
 	if err != nil {
 		return
@@ -606,11 +671,13 @@ func (s *Storage) Stat(path string, pairs ...Pair) (o *Object, err error) {
 
 // StatWithContext will stat a path to get info of an object.
 func (s *Storage) StatWithContext(ctx context.Context, path string, pairs ...Pair) (o *Object, err error) {
+	pairs = append(pairs, s.defaultPairs.Stat...)
+	var opt pairStorageStat
+
 	defer func() {
 		err = s.formatError("stat", err, path)
 	}()
-	pairs = append(pairs, s.defaultPairs.Stat...)
-	var opt pairStorageStat
+
 	opt, err = s.parsePairStorageStat(pairs)
 	if err != nil {
 		return
@@ -629,11 +696,13 @@ func (s *Storage) Write(path string, r io.Reader, size int64, pairs ...Pair) (n 
 
 // WriteWithContext will write data into a file.
 func (s *Storage) WriteWithContext(ctx context.Context, path string, r io.Reader, size int64, pairs ...Pair) (n int64, err error) {
+	pairs = append(pairs, s.defaultPairs.Write...)
+	var opt pairStorageWrite
+
 	defer func() {
 		err = s.formatError("write", err, path)
 	}()
-	pairs = append(pairs, s.defaultPairs.Write...)
-	var opt pairStorageWrite
+
 	opt, err = s.parsePairStorageWrite(pairs)
 	if err != nil {
 		return
