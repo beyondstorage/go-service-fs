@@ -27,6 +27,11 @@ type Storage struct {
 
 	defaultPairs DefaultStoragePairs
 	pairPolicy   typ.PairPolicy
+
+	typ.UnimplementedStorager
+	typ.UnimplementedCopier
+	typ.UnimplementedMover
+	typ.UnimplementedFetcher
 }
 
 // String implements Storager.String
