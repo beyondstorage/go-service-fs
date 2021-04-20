@@ -38,7 +38,7 @@ unit_test:
 	go tool cover -html="coverage.txt" -o "coverage.html"
 
 integration_test:
-	go test -tags integration_test -race -covermode=atomic -v ./tests
+	STORAGE_QINGSTOR_INTEGRATION_TEST=on  go test -race -covermode=atomic -v ./tests
 
 tidy:
 	@go mod tidy

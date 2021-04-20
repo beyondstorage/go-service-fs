@@ -43,17 +43,21 @@ func (s *Storage) copy(ctx context.Context, src string, dst string, opt pairStor
 	rs := s.getAbsPath(src)
 	rd := s.getAbsPath(dst)
 
-	srcFile, err := s.openFile(rs)
+	srcFile, needClose, err := s.openFile(rs, os.O_RDONLY)
 	if err != nil {
 		return err
 	}
-	defer srcFile.Close()
+	if needClose {
+		defer srcFile.Close()
+	}
 
-	dstFile, err := s.createFile(rd)
+	dstFile, needClose, err := s.createFile(rd)
 	if err != nil {
 		return err
 	}
-	defer dstFile.Close()
+	if needClose {
+		defer dstFile.Close()
+	}
 
 	_, err = io.CopyBuffer(dstFile, srcFile, make([]byte, 1024*1024))
 	if err != nil {
@@ -68,6 +72,28 @@ func (s *Storage) create(path string, opt pairStorageCreate) (o *Object) {
 	o.Path = path
 	o.Mode = ModeRead
 	return o
+}
+
+func (s *Storage) createAppend(ctx context.Context, path string, opt pairStorageCreateAppend) (o *Object, err error) {
+	rp := s.getAbsPath(path)
+
+	f, needClose, err := s.createFile(rp)
+	if err != nil {
+		return
+	}
+	if needClose {
+		err = f.Close()
+		if err != nil {
+			return
+		}
+	}
+
+	o = s.newObject(true)
+	o.ID = rp
+	o.Path = path
+	o.Mode = ModeRead | ModeAppend
+
+	return o, nil
 }
 
 func (s *Storage) fetch(ctx context.Context, path string, url string, opt pairStorageFetch) (err error) {
@@ -139,17 +165,19 @@ func (s *Storage) read(ctx context.Context, path string, w io.Writer, opt pairSt
 
 	rp := s.getAbsPath(path)
 
-	f, err := s.openFile(rp)
+	f, needClose, err := s.openFile(rp, os.O_RDONLY)
 	if err != nil {
 		return
 	}
-	defer func() {
-		closeErr := f.Close()
-		// Only return close error while copy without error
-		if err == nil {
-			err = closeErr
-		}
-	}()
+	if needClose {
+		defer func() {
+			closeErr := f.Close()
+			// Only return close error while copy without error
+			if err == nil {
+				err = closeErr
+			}
+		}()
+	}
 
 	if opt.HasOffset {
 		_, err = f.Seek(opt.Offset, 0)
@@ -222,13 +250,28 @@ func (s *Storage) write(ctx context.Context, path string, r io.Reader, size int6
 		return 0, s.createDir(rp)
 	}
 
-	f, err = s.createFile(rp)
+	f, needClose, err := s.createFile(rp)
 	if err != nil {
 		return
+	}
+	if needClose {
+		defer f.Close()
 	}
 
 	if opt.HasIoCallback {
 		r = iowrap.CallbackReader(r, opt.IoCallback)
+	}
+
+	return io.CopyN(f, r, size)
+}
+
+func (s *Storage) writeAppend(ctx context.Context, o *Object, r io.Reader, size int64, opt pairStorageWriteAppend) (n int64, err error) {
+	f, needClose, err := s.createFile(o.ID)
+	if err != nil {
+		return
+	}
+	if needClose {
+		defer f.Close()
 	}
 
 	return io.CopyN(f, r, size)

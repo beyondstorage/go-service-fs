@@ -91,16 +91,18 @@ func parsePairStorageNew(opts []Pair) (pairStorageNew, error) {
 
 // DefaultStoragePairs is default pairs for specific action
 type DefaultStoragePairs struct {
-	Copy     []Pair
-	Create   []Pair
-	Delete   []Pair
-	Fetch    []Pair
-	List     []Pair
-	Metadata []Pair
-	Move     []Pair
-	Read     []Pair
-	Stat     []Pair
-	Write    []Pair
+	Copy         []Pair
+	Create       []Pair
+	CreateAppend []Pair
+	Delete       []Pair
+	Fetch        []Pair
+	List         []Pair
+	Metadata     []Pair
+	Move         []Pair
+	Read         []Pair
+	Stat         []Pair
+	Write        []Pair
+	WriteAppend  []Pair
 }
 
 // pairStorageCopy is the parsed struct
@@ -164,6 +166,38 @@ func (s *Storage) parsePairStorageCreate(opts []Pair) (pairStorageCreate, error)
 
 			if s.pairPolicy.All || s.pairPolicy.Create {
 				return pairStorageCreate{}, services.NewPairUnsupportedError(v)
+			}
+
+		}
+	}
+
+	return result, nil
+}
+
+// pairStorageCreateAppend is the parsed struct
+type pairStorageCreateAppend struct {
+	pairs []Pair
+
+	// Required pairs
+	// Optional pairs
+	// Generated pairs
+}
+
+// parsePairStorageCreateAppend will parse Pair slice into *pairStorageCreateAppend
+func (s *Storage) parsePairStorageCreateAppend(opts []Pair) (pairStorageCreateAppend, error) {
+	result := pairStorageCreateAppend{
+		pairs: opts,
+	}
+
+	for _, v := range opts {
+		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		// Generated pairs
+		default:
+
+			if s.pairPolicy.All || s.pairPolicy.CreateAppend {
+				return pairStorageCreateAppend{}, services.NewPairUnsupportedError(v)
 			}
 
 		}
@@ -473,6 +507,38 @@ func (s *Storage) parsePairStorageWrite(opts []Pair) (pairStorageWrite, error) {
 	return result, nil
 }
 
+// pairStorageWriteAppend is the parsed struct
+type pairStorageWriteAppend struct {
+	pairs []Pair
+
+	// Required pairs
+	// Optional pairs
+	// Generated pairs
+}
+
+// parsePairStorageWriteAppend will parse Pair slice into *pairStorageWriteAppend
+func (s *Storage) parsePairStorageWriteAppend(opts []Pair) (pairStorageWriteAppend, error) {
+	result := pairStorageWriteAppend{
+		pairs: opts,
+	}
+
+	for _, v := range opts {
+		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		// Generated pairs
+		default:
+
+			if s.pairPolicy.All || s.pairPolicy.WriteAppend {
+				return pairStorageWriteAppend{}, services.NewPairUnsupportedError(v)
+			}
+
+		}
+	}
+
+	return result, nil
+}
+
 // Copy will copy an Object or multiple object in the service.
 //
 // This function will create a context by default.
@@ -509,6 +575,31 @@ func (s *Storage) Create(path string, pairs ...Pair) (o *Object) {
 	opt, _ = s.parsePairStorageCreate(pairs)
 
 	return s.create(path, opt)
+}
+
+// CreateAppend will create an append object.
+//
+// This function will create a context by default.
+func (s *Storage) CreateAppend(path string, pairs ...Pair) (o *Object, err error) {
+	ctx := context.Background()
+	return s.CreateAppendWithContext(ctx, path, pairs...)
+}
+
+// CreateAppendWithContext will create an append object.
+func (s *Storage) CreateAppendWithContext(ctx context.Context, path string, pairs ...Pair) (o *Object, err error) {
+	pairs = append(pairs, s.defaultPairs.CreateAppend...)
+	var opt pairStorageCreateAppend
+
+	defer func() {
+		err = s.formatError("create_append", err, path)
+	}()
+
+	opt, err = s.parsePairStorageCreateAppend(pairs)
+	if err != nil {
+		return
+	}
+
+	return s.createAppend(ctx, path, opt)
 }
 
 // Delete will delete an Object from service.
@@ -709,4 +800,29 @@ func (s *Storage) WriteWithContext(ctx context.Context, path string, r io.Reader
 	}
 
 	return s.write(ctx, path, r, size, opt)
+}
+
+// WriteAppend will append content to an append object.
+//
+// This function will create a context by default.
+func (s *Storage) WriteAppend(o *Object, r io.Reader, size int64, pairs ...Pair) (n int64, err error) {
+	ctx := context.Background()
+	return s.WriteAppendWithContext(ctx, o, r, size, pairs...)
+}
+
+// WriteAppendWithContext will append content to an append object.
+func (s *Storage) WriteAppendWithContext(ctx context.Context, o *Object, r io.Reader, size int64, pairs ...Pair) (n int64, err error) {
+	pairs = append(pairs, s.defaultPairs.WriteAppend...)
+	var opt pairStorageWriteAppend
+
+	defer func() {
+		err = s.formatError("write_append", err)
+	}()
+
+	opt, err = s.parsePairStorageWriteAppend(pairs)
+	if err != nil {
+		return
+	}
+
+	return s.writeAppend(ctx, o, r, size, opt)
 }

@@ -1,5 +1,3 @@
-// +build integration_test
-
 package tests
 
 import (
@@ -10,4 +8,8 @@ import (
 
 func TestStorage(t *testing.T) {
 	tests.TestStorager(t, setupTest(t))
+}
+
+func TestAppend(t *testing.T) {
+	tests.TestAppender(t, setupTest(t))
 }

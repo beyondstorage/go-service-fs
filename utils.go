@@ -32,6 +32,7 @@ type Storage struct {
 	typ.UnimplementedCopier
 	typ.UnimplementedMover
 	typ.UnimplementedFetcher
+	typ.UnimplementedAppender
 }
 
 // String implements Storager.String
@@ -94,7 +95,7 @@ func (s *Storage) newObject(done bool) *typ.Object {
 	return typ.NewObject(s, done)
 }
 
-func (s *Storage) openFile(absPath string) (f *os.File, err error) {
+func (s *Storage) openFile(absPath string, mode int) (f *os.File, needClose bool, err error) {
 	switch absPath {
 	case Stdin:
 		f = os.Stdin
@@ -103,13 +104,14 @@ func (s *Storage) openFile(absPath string) (f *os.File, err error) {
 	case Stderr:
 		f = os.Stderr
 	default:
-		f, err = os.Open(absPath)
+		needClose = true
+		f, err = os.OpenFile(absPath, mode, 0664)
 	}
 
 	return
 }
 
-func (s *Storage) createFile(absPath string) (f *os.File, err error) {
+func (s *Storage) createFile(absPath string) (f *os.File, needClose bool, err error) {
 	switch absPath {
 	case Stdin:
 		f = os.Stdin
@@ -125,9 +127,10 @@ func (s *Storage) createFile(absPath string) (f *os.File, err error) {
 		// Create dir before create file
 		err = os.MkdirAll(filepath.Dir(absPath), 0755)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
+		needClose = true
 		f, err = os.Create(absPath)
 	}
 
