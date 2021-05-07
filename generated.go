@@ -50,7 +50,8 @@ func setObjectMetadata(o *Object, om ObjectMetadata) {
 	o.SetServiceMetadata(om)
 }
 
-// WithDefaultStoragePairs will apply default_storage_pairs value to Options
+// WithDefaultStoragePairs will apply default_storage_pairs value to Options.
+//
 // DefaultStoragePairs set default pairs for storager actions
 func WithDefaultStoragePairs(v DefaultStoragePairs) Pair {
 	return Pair{
@@ -111,6 +112,7 @@ func parsePairStorageNew(opts []Pair) (pairStorageNew, error) {
 
 // DefaultStoragePairs is default pairs for specific action
 type DefaultStoragePairs struct {
+	CommitAppend []Pair
 	Copy         []Pair
 	Create       []Pair
 	CreateAppend []Pair
@@ -123,6 +125,38 @@ type DefaultStoragePairs struct {
 	Stat         []Pair
 	Write        []Pair
 	WriteAppend  []Pair
+}
+
+// pairStorageCommitAppend is the parsed struct
+type pairStorageCommitAppend struct {
+	pairs []Pair
+
+	// Required pairs
+	// Optional pairs
+	// Generated pairs
+}
+
+// parsePairStorageCommitAppend will parse Pair slice into *pairStorageCommitAppend
+func (s *Storage) parsePairStorageCommitAppend(opts []Pair) (pairStorageCommitAppend, error) {
+	result := pairStorageCommitAppend{
+		pairs: opts,
+	}
+
+	for _, v := range opts {
+		switch v.Key {
+		// Required pairs
+		// Optional pairs
+		// Generated pairs
+		default:
+
+			if s.pairPolicy.All || s.pairPolicy.CommitAppend {
+				return pairStorageCommitAppend{}, services.NewPairUnsupportedError(v)
+			}
+
+		}
+	}
+
+	return result, nil
 }
 
 // pairStorageCopy is the parsed struct
@@ -557,6 +591,31 @@ func (s *Storage) parsePairStorageWriteAppend(opts []Pair) (pairStorageWriteAppe
 	}
 
 	return result, nil
+}
+
+// CommitAppend will commit and finish an append process.
+//
+// This function will create a context by default.
+func (s *Storage) CommitAppend(o *Object, pairs ...Pair) (err error) {
+	ctx := context.Background()
+	return s.CommitAppendWithContext(ctx, o, pairs...)
+}
+
+// CommitAppendWithContext will commit and finish an append process.
+func (s *Storage) CommitAppendWithContext(ctx context.Context, o *Object, pairs ...Pair) (err error) {
+	pairs = append(pairs, s.defaultPairs.CommitAppend...)
+	var opt pairStorageCommitAppend
+
+	defer func() {
+		err = s.formatError("commit_append", err)
+	}()
+
+	opt, err = s.parsePairStorageCommitAppend(pairs)
+	if err != nil {
+		return
+	}
+
+	return s.commitAppend(ctx, o, opt)
 }
 
 // Copy will copy an Object or multiple object in the service.
