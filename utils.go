@@ -137,14 +137,6 @@ func (s *Storage) createFile(absPath string) (f *os.File, needClose bool, err er
 	return
 }
 
-func (s *Storage) createDir(absPath string) (err error) {
-	defer func() {
-		err = s.formatError("create_dir", err, absPath)
-	}()
-
-	return os.MkdirAll(absPath, 0755)
-}
-
 func (s *Storage) statFile(absPath string) (fi os.FileInfo, err error) {
 	switch absPath {
 	case Stdin:
