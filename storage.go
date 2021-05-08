@@ -107,6 +107,21 @@ func (s *Storage) createAppend(ctx context.Context, path string, opt pairStorage
 	return o, nil
 }
 
+func (s *Storage) createDir(ctx context.Context, path string, opt pairStorageCreateDir) (o *Object, err error) {
+	rp := s.getAbsPath(path)
+
+	err = os.MkdirAll(rp, 0755)
+	if err != nil {
+		return
+	}
+
+	o = s.newObject(true)
+	o.ID = rp
+	o.Path = path
+	o.Mode |= ModeDir
+	return
+}
+
 func (s *Storage) fetch(ctx context.Context, path string, url string, opt pairStorageFetch) (err error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -255,11 +270,6 @@ func (s *Storage) write(ctx context.Context, path string, r io.Reader, size int6
 	var f io.WriteCloser
 
 	rp := s.getAbsPath(path)
-
-	if s.isDirPath(rp) {
-		// FIXME: Do we need to check r == nil && size == 0 ?
-		return 0, s.createDir(rp)
-	}
 
 	f, needClose, err := s.createFile(rp)
 	if err != nil {
