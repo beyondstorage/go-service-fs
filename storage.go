@@ -2,6 +2,7 @@ package fs
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -18,9 +19,15 @@ func (s *Storage) delete(ctx context.Context, path string, opt pairStorageDelete
 	rp := s.getAbsPath(path)
 
 	err = os.Remove(rp)
+	if err != nil && errors.Is(err, os.ErrNotExist) {
+		// Omit `file not exist` error here
+		// ref: [AOS-46](https://github.com/aos-dev/specs/blob/master/rfcs/46-idempotent-delete.md)
+		err = nil
+	}
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -37,6 +44,10 @@ type listDirInput struct {
 
 func (input *listDirInput) ContinuationToken() string {
 	return input.continuationToken
+}
+
+func (s *Storage) commitAppend(ctx context.Context, o *Object, opt pairStorageCommitAppend) (err error) {
+	return
 }
 
 func (s *Storage) copy(ctx context.Context, src string, dst string, opt pairStorageCopy) (err error) {
