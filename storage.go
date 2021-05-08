@@ -20,7 +20,8 @@ func (s *Storage) delete(ctx context.Context, path string, opt pairStorageDelete
 
 	err = os.Remove(rp)
 	if err != nil && errors.Is(err, os.ErrNotExist) {
-		// omit `file not exist` error, ref: https://github.com/aos-dev/specs/blob/master/rfcs/46-idempotent-delete.md
+		// Omit `file not exist` error here
+		// ref: [AOS-46](https://github.com/aos-dev/specs/blob/master/rfcs/46-idempotent-delete.md)
 		err = nil
 	}
 	if err != nil {
