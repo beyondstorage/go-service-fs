@@ -12,6 +12,7 @@ import (
 	"github.com/qingstor/go-mime"
 
 	"github.com/aos-dev/go-storage/v3/pkg/iowrap"
+	"github.com/aos-dev/go-storage/v3/services"
 	. "github.com/aos-dev/go-storage/v3/types"
 )
 
@@ -135,7 +136,15 @@ func (s *Storage) fetch(ctx context.Context, path string, url string, opt pairSt
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("fetch from url %s expected %d, but got %d", url, http.StatusOK, resp.StatusCode)
+		switch resp.StatusCode {
+		case 403:
+			err = services.ErrPermissionDenied
+		case 404:
+			err = services.ErrObjectNotExist
+		default:
+			err = services.ErrUnexpected
+		}
+		return fmt.Errorf("%w: fetch from url %s expected %d, but got %d", err, url, http.StatusOK, resp.StatusCode)
 	}
 	_, err = s.WriteWithContext(ctx, path, resp.Body, resp.ContentLength)
 	if err != nil {
