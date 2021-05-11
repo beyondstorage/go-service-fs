@@ -135,7 +135,15 @@ func (s *Storage) fetch(ctx context.Context, path string, url string, opt pairSt
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("fetch from url %s expected %d, but got %d", url, http.StatusOK, resp.StatusCode)
+		switch resp.StatusCode {
+		case 403:
+			err = os.ErrPermission
+		case 404:
+			err = os.ErrNotExist
+		default:
+			return fmt.Errorf("fetch from url %s expected %d, but got %d", url, http.StatusOK, resp.StatusCode)
+		}
+		return fmt.Errorf("%w: fetch from url %s expected %d, but got %d", err, url, http.StatusOK, resp.StatusCode)
 	}
 	_, err = s.WriteWithContext(ctx, path, resp.Body, resp.ContentLength)
 	if err != nil {
