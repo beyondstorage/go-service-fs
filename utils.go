@@ -84,17 +84,12 @@ func formatError(err error) error {
 	if _, ok := err.(services.AosError); ok {
 		return err
 	}
-	if errors.Unwrap(err) != nil {
-		if _, ok := err.(services.AosError); ok {
-			return err
-		}
-	}
 
 	// Handle error returned by os package.
 	switch {
-	case os.IsNotExist(err):
+	case errors.Is(err, os.ErrNotExist):
 		return fmt.Errorf("%w: %v", services.ErrObjectNotExist, err)
-	case os.IsPermission(err):
+	case errors.Is(err, os.ErrPermission):
 		return fmt.Errorf("%w: %v", services.ErrPermissionDenied, err)
 	default:
 		return fmt.Errorf("%w: %v", services.ErrUnexpected, err)
