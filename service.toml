@@ -1,7 +1,7 @@
 name = "fs"
 
 [namespace.storage]
-implement = ["copier", "mover","fetcher", "appender", "direr"]
+implement = ["copier", "mover", "fetcher", "appender", "direr"]
 
 [namespace.storage.new]
 optional = ["default_storage_pairs", "pair_policy", "work_dir"]
@@ -10,7 +10,7 @@ optional = ["default_storage_pairs", "pair_policy", "work_dir"]
 optional = ["multipart_id"]
 
 [namespace.storage.op.list]
-optional = ["continuation_token","list_mode"]
+optional = ["continuation_token", "list_mode"]
 
 [namespace.storage.op.read]
 optional = ["offset", "io_callback", "size"]
