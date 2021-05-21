@@ -5,11 +5,11 @@ import (
 	"context"
 	"io"
 
-	"github.com/aos-dev/go-storage/v3/pkg/credential"
-	"github.com/aos-dev/go-storage/v3/pkg/endpoint"
-	"github.com/aos-dev/go-storage/v3/pkg/httpclient"
-	"github.com/aos-dev/go-storage/v3/services"
-	. "github.com/aos-dev/go-storage/v3/types"
+	"github.com/beyondstorage/go-storage/v4/pkg/credential"
+	"github.com/beyondstorage/go-storage/v4/pkg/endpoint"
+	"github.com/beyondstorage/go-storage/v4/pkg/httpclient"
+	"github.com/beyondstorage/go-storage/v4/services"
+	. "github.com/beyondstorage/go-storage/v4/types"
 )
 
 var _ credential.Provider
@@ -821,26 +821,14 @@ func (s *Storage) ListWithContext(ctx context.Context, path string, pairs ...Pai
 // Metadata will return current storager metadata.
 //
 // This function will create a context by default.
-func (s *Storage) Metadata(pairs ...Pair) (meta *StorageMeta, err error) {
-	ctx := context.Background()
-	return s.MetadataWithContext(ctx, pairs...)
-}
-
-// MetadataWithContext will return current storager metadata.
-func (s *Storage) MetadataWithContext(ctx context.Context, pairs ...Pair) (meta *StorageMeta, err error) {
-	defer func() {
-		err = s.formatError("metadata", err)
-	}()
-
+func (s *Storage) Metadata(pairs ...Pair) (meta *StorageMeta) {
 	pairs = append(pairs, s.defaultPairs.Metadata...)
 	var opt pairStorageMetadata
 
-	opt, err = s.parsePairStorageMetadata(pairs)
-	if err != nil {
-		return
-	}
+	// Ignore error while handling local funtions.
+	opt, _ = s.parsePairStorageMetadata(pairs)
 
-	return s.metadata(ctx, opt)
+	return s.metadata(opt)
 }
 
 // Move will move an object in the service.

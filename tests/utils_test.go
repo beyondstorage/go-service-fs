@@ -3,9 +3,9 @@ package tests
 import (
 	"testing"
 
-	fs "github.com/aos-dev/go-service-fs/v2"
-	ps "github.com/aos-dev/go-storage/v3/pairs"
-	"github.com/aos-dev/go-storage/v3/types"
+	fs "github.com/beyondstorage/go-service-fs/v3"
+	ps "github.com/beyondstorage/go-storage/v4/pairs"
+	"github.com/beyondstorage/go-storage/v4/types"
 )
 
 func setupTest(t *testing.T) types.Storager {

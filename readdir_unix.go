@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	typ "github.com/aos-dev/go-storage/v3/types"
+	typ "github.com/beyondstorage/go-storage/v4/types"
 )
 
 // Available value for Dirent Type
