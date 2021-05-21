@@ -2,4 +2,4 @@
 
 package fs
 
-import _ "github.com/aos-dev/go-storage/v3/cmd/definitions"
+import _ "github.com/beyondstorage/go-storage/v4/cmd/definitions"

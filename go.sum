@@ -1,13 +1,11 @@
 github.com/Xuanwo/templateutils v0.1.0 h1:WpkWOqQtIQ2vAIpJLa727DdN8WtxhUkkbDGa6UhntJY=
 github.com/Xuanwo/templateutils v0.1.0/go.mod h1:OdE0DJ+CJxDBq6psX5DPV+gOZi8bhuHuVUpPCG++Wb8=
-github.com/aos-dev/go-integration-test/v3 v3.0.1-0.20210512065058-b6c8caf13bc6 h1:73QZDkTGFyWpkWVrjs0GEM1VREyEmM7RtzddWtBYXho=
-github.com/aos-dev/go-integration-test/v3 v3.0.1-0.20210512065058-b6c8caf13bc6/go.mod h1:iMlF4lL4WavgZezGscajjSNcUdFnacX8Dek6lhE0oJA=
-github.com/aos-dev/go-storage/v3 v3.6.1-0.20210512033924-5adf27cfdf96/go.mod h1:6arAU5t7CXEsxDPs87xqgHmvEj8/GQfHlV61CxxC0Ww=
-github.com/aos-dev/go-storage/v3 v3.6.1-0.20210513125055-cb9106d884d5 h1:xiJN6PvJPDDVac4Ha+ekuGUjRh49O1a1xwxrJPCwlto=
-github.com/aos-dev/go-storage/v3 v3.6.1-0.20210513125055-cb9106d884d5/go.mod h1:qareAWtwrRlx4Fw6XIhtAbQnM7I3wylhaQ5Gr3Q5Geg=
-github.com/aos-dev/specs/go v0.0.0-20210512024100-386a13f23a83/go.mod h1:gNah3KaPJEfysh7uCCX+sYjQC3g2yx2VgBkFlT945Ws=
-github.com/aos-dev/specs/go v0.0.0-20210512093613-3e7634b4a7f5 h1:MmXROEim7Z9u1lFLRvZCy/yKBhq3k1Q/nvaVQmVvZUU=
-github.com/aos-dev/specs/go v0.0.0-20210512093613-3e7634b4a7f5/go.mod h1:owye99eWsZvtg5kCEKtSp+AsRPsANhnXgCzHacu4icM=
+github.com/beyondstorage/go-integration-test/v4 v4.0.0-20210521062555-83f8f166943f h1:2a44nxIWm5DgEb6/gnD3We/32Bx19ET0iOM4+mxOmp8=
+github.com/beyondstorage/go-integration-test/v4 v4.0.0-20210521062555-83f8f166943f/go.mod h1:PUhp+CDYnsysCKVU7poqIK7ZWTfADkOu2Z/PjlSIhsY=
+github.com/beyondstorage/go-storage/v4 v4.0.0-20210521045436-248353dfc077 h1:BxqrLLELv6ZvP4+DZlwPAwBhNYkQqpZFvujvUT8zGiY=
+github.com/beyondstorage/go-storage/v4 v4.0.0-20210521045436-248353dfc077/go.mod h1:oa2dYco+xplPj99WSBnYVw/xXvRkIKWSSVDQKNZ5Kz8=
+github.com/beyondstorage/specs/go v0.0.0-20210521044836-3d41c1d9c97f h1:KMXKB/LACUmnOfLfjND8222qtzWT9lWRUdsPOlM4FqE=
+github.com/beyondstorage/specs/go v0.0.0-20210521044836-3d41c1d9c97f/go.mod h1:f5VvmLHc/dNJwl+/yAv/TOHdev3phvuEswx8DIXiSQQ=
 github.com/dave/dst v0.26.2 h1:lnxLAKI3tx7MgLNVDirFCsDTlTG9nKTk7GcptKcWSwY=
 github.com/dave/dst v0.26.2/go.mod h1:UMDJuIRPfyUCC78eFuB+SV/WI8oDeyFDvM/JR6NI3IU=
 github.com/dave/gopackages v0.0.0-20170318123100-46e7023ec56e/go.mod h1:i00+b/gKdIDIxuLDFob7ustLAVqhsZRk2qVZrArELGQ=
@@ -33,7 +31,6 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/pelletier/go-toml v1.9.0/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pelletier/go-toml v1.9.1 h1:a6qW1EVNZWH9WGI6CsYdD8WAylkoXBS5yv0XHlh17Tc=
 github.com/pelletier/go-toml v1.9.1/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

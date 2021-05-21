@@ -6,7 +6,7 @@ import (
 	"path"
 	"path/filepath"
 
-	typ "github.com/aos-dev/go-storage/v3/types"
+	typ "github.com/beyondstorage/go-storage/v4/types"
 	"golang.org/x/sys/windows"
 )
 

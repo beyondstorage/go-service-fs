@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aos-dev/go-storage/v3/services"
+	"github.com/beyondstorage/go-storage/v4/services"
 	"github.com/stretchr/testify/assert"
 )
 
