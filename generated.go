@@ -60,6 +60,15 @@ func WithDefaultStoragePairs(v DefaultStoragePairs) Pair {
 	}
 }
 
+var (
+	_ Appender = &Storage{}
+	_ Copier   = &Storage{}
+	_ Direr    = &Storage{}
+	_ Fetcher  = &Storage{}
+	_ Mover    = &Storage{}
+	_ Storager = &Storage{}
+)
+
 // pairStorageNew is the parsed struct
 type pairStorageNew struct {
 	pairs []Pair
