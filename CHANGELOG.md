@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v3.0.0] - 2021-05-24
+
+### Added
+
+- storage: Implement GSP-49 Add CreateDir Operation (#39)
+- *: Implement GSP-47 & GSP-51 (#40)
+- storage: Implement GSP-61 Add object mode check for operations (#41)
+
+### Changed
+
+- storage: Idempotent storager delete operation (#38)
+- *: Implement GSP-73 Organization rename (#42)
+
 ## [v2.1.0] - 2021-04-24
 
 ### Added
@@ -37,5 +50,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Implement fs services.
 
+[v3.0.0]: https://github.com/beyondstorage/go-service-fs/compare/v2.1.0...v3.0.0
 [v2.1.0]: https://github.com/beyondstorage/go-service-fs/compare/v2.0.0...v2.1.0
 [v2.0.0]: https://github.com/beyondstorage/go-service-fs/compare/v1.0.0...v2.0.0
