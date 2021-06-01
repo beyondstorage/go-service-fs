@@ -16,8 +16,7 @@ optional = ["continuation_token", "list_mode"]
 optional = ["offset", "io_callback", "size"]
 
 [namespace.storage.op.write]
-optional = ["io_callback", "offset"]
-virtual = ["content_md5", "content_type"]
+optional = ["content_md5", "content_type", "offset", "io_callback"]
 
 [pairs.storage_features]
 type = "StorageFeatures"
