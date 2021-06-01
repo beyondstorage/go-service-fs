@@ -27,7 +27,7 @@ type Storage struct {
 	workDir string // workDir dir for all operation.
 
 	defaultPairs DefaultStoragePairs
-	pairPolicy   typ.PairPolicy
+	features     StorageFeatures
 
 	typ.UnimplementedStorager
 	typ.UnimplementedCopier
@@ -66,8 +66,8 @@ func newStorager(pairs ...typ.Pair) (store *Storage, err error) {
 	if opt.HasDefaultStoragePairs {
 		store.defaultPairs = opt.DefaultStoragePairs
 	}
-	if opt.HasPairPolicy {
-		store.pairPolicy = opt.PairPolicy
+	if opt.HasStorageFeatures {
+		store.features = opt.StorageFeatures
 	}
 	if opt.HasWorkDir {
 		store.workDir = opt.WorkDir
