@@ -78,10 +78,16 @@ func (s *Storage) copy(ctx context.Context, src string, dst string, opt pairStor
 }
 
 func (s *Storage) create(path string, opt pairStorageCreate) (o *Object) {
-	o = s.newObject(false)
+	if opt.HasObjectMode && opt.ObjectMode.IsDir() {
+		o = s.newObject(false)
+		o.Mode = ModeDir
+	} else {
+		o = s.newObject(false)
+		o.Mode = ModeRead
+	}
+
 	o.ID = filepath.Join(s.workDir, path)
 	o.Path = path
-	o.Mode = ModeRead
 	return o
 }
 
