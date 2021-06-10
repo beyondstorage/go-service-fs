@@ -1,11 +1,9 @@
 github.com/Xuanwo/templateutils v0.1.0 h1:WpkWOqQtIQ2vAIpJLa727DdN8WtxhUkkbDGa6UhntJY=
 github.com/Xuanwo/templateutils v0.1.0/go.mod h1:OdE0DJ+CJxDBq6psX5DPV+gOZi8bhuHuVUpPCG++Wb8=
-github.com/beyondstorage/go-integration-test/v4 v4.0.0 h1:tdXQV9yxQ3Q6p9xfyQKzK3MEo9r9j9g3uT5+3sbVtnQ=
-github.com/beyondstorage/go-integration-test/v4 v4.0.0/go.mod h1:26/JF4b0XxRN0pL4kihpnVNhbbw+QWvmmvgxfnFJDfA=
-github.com/beyondstorage/go-storage/v4 v4.0.0/go.mod h1:oa2dYco+xplPj99WSBnYVw/xXvRkIKWSSVDQKNZ5Kz8=
+github.com/beyondstorage/go-integration-test/v4 v4.1.0 h1:/cKM5uC+tW1mYAM/FTQlMq3EZMAb8hBm8gL4ZHk9InQ=
+github.com/beyondstorage/go-integration-test/v4 v4.1.0/go.mod h1:W6Dhve1tbEpWAR1WSRuJl4UYpMNpM2QTAcb1dCpuEUI=
 github.com/beyondstorage/go-storage/v4 v4.1.0 h1:O5SuSoTvs0KeXaZ/dYhpURlki6PjTNPyIzsJMY9sJWw=
 github.com/beyondstorage/go-storage/v4 v4.1.0/go.mod h1:dK5DFnvKQI70bfpM1MLU9QqDYB12Z/dFV5sUnbJ/AoU=
-github.com/beyondstorage/specs/go v0.0.0-20210521044836-3d41c1d9c97f/go.mod h1:f5VvmLHc/dNJwl+/yAv/TOHdev3phvuEswx8DIXiSQQ=
 github.com/beyondstorage/specs/go v0.0.0-20210608070420-9185b588aa58 h1:AvxsyR0bSSBi90WtYEMdAkM4Sm+Xxr7JVGXAQVVfeOo=
 github.com/beyondstorage/specs/go v0.0.0-20210608070420-9185b588aa58/go.mod h1:1Az5o44awI/Ljop+ppO2djyezVfdKKb1RjJ6+M+a5XQ=
 github.com/dave/dst v0.26.2 h1:lnxLAKI3tx7MgLNVDirFCsDTlTG9nKTk7GcptKcWSwY=
@@ -33,7 +31,6 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/pelletier/go-toml v1.9.1/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pelletier/go-toml v1.9.2 h1:7NiByeVF4jKSG1lDF3X8LTIkq2/bu+1uYbIm1eS5tzk=
 github.com/pelletier/go-toml v1.9.2/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
