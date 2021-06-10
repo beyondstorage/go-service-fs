@@ -243,9 +243,9 @@ func (s *Storage) parsePairStorageCopy(opts []Pair) (pairStorageCopy, error) {
 
 // pairStorageCreate is the parsed struct
 type pairStorageCreate struct {
-	pairs          []Pair
-	HasMultipartID bool
-	MultipartID    string
+	pairs         []Pair
+	HasObjectMode bool
+	ObjectMode    ObjectMode
 }
 
 // parsePairStorageCreate will parse Pair slice into *pairStorageCreate
@@ -259,12 +259,12 @@ func (s *Storage) parsePairStorageCreate(opts []Pair) (pairStorageCreate, error)
 		isUnsupportedPair := false
 
 		switch v.Key {
-		case "multipart_id":
-			if result.HasMultipartID {
+		case "object_mode":
+			if result.HasObjectMode {
 				continue
 			}
-			result.HasMultipartID = true
-			result.MultipartID = v.Value.(string)
+			result.HasObjectMode = true
+			result.ObjectMode = v.Value.(ObjectMode)
 			continue
 		default:
 			isUnsupportedPair = true
@@ -360,7 +360,9 @@ func (s *Storage) parsePairStorageCreateDir(opts []Pair) (pairStorageCreateDir, 
 
 // pairStorageDelete is the parsed struct
 type pairStorageDelete struct {
-	pairs []Pair
+	pairs         []Pair
+	HasObjectMode bool
+	ObjectMode    ObjectMode
 }
 
 // parsePairStorageDelete will parse Pair slice into *pairStorageDelete
@@ -374,6 +376,13 @@ func (s *Storage) parsePairStorageDelete(opts []Pair) (pairStorageDelete, error)
 		isUnsupportedPair := false
 
 		switch v.Key {
+		case "object_mode":
+			if result.HasObjectMode {
+				continue
+			}
+			result.HasObjectMode = true
+			result.ObjectMode = v.Value.(ObjectMode)
+			continue
 		default:
 			isUnsupportedPair = true
 		}
@@ -621,7 +630,9 @@ func (s *Storage) parsePairStorageRead(opts []Pair) (pairStorageRead, error) {
 
 // pairStorageStat is the parsed struct
 type pairStorageStat struct {
-	pairs []Pair
+	pairs         []Pair
+	HasObjectMode bool
+	ObjectMode    ObjectMode
 }
 
 // parsePairStorageStat will parse Pair slice into *pairStorageStat
@@ -635,6 +646,13 @@ func (s *Storage) parsePairStorageStat(opts []Pair) (pairStorageStat, error) {
 		isUnsupportedPair := false
 
 		switch v.Key {
+		case "object_mode":
+			if result.HasObjectMode {
+				continue
+			}
+			result.HasObjectMode = true
+			result.ObjectMode = v.Value.(ObjectMode)
+			continue
 		default:
 			isUnsupportedPair = true
 		}
@@ -819,6 +837,11 @@ func (s *Storage) CopyWithContext(ctx context.Context, src string, dst string, p
 
 // Create will create a new object without any api call.
 //
+// ## Behavior
+//
+// - Create SHOULD NOT send any API call.
+// - Create SHOULD accept ObjectMode pair as object mode.
+//
 // This function will create a context by default.
 func (s *Storage) Create(path string, pairs ...Pair) (o *Object) {
 	pairs = append(pairs, s.defaultPairs.Create...)
@@ -880,7 +903,17 @@ func (s *Storage) CreateDirWithContext(ctx context.Context, path string, pairs .
 	return s.createDir(ctx, path, opt)
 }
 
-// Delete will delete an Object from service.
+// Delete will delete an object from service.
+//
+// ## Behavior
+//
+// - Delete only delete one and only one object.
+//   - Service DON'T NEED to support remove all.
+//   - User NEED to implement remove_all by themself.
+// - Delete is idempotent.
+//   - Successful delete always return nil error.
+//   - Delete SHOULD never return `ObjectNotExist`
+//   - Delete DON'T NEED to check the object exist or not.
 //
 // This function will create a context by default.
 func (s *Storage) Delete(path string, pairs ...Pair) (err error) {
@@ -888,7 +921,17 @@ func (s *Storage) Delete(path string, pairs ...Pair) (err error) {
 	return s.DeleteWithContext(ctx, path, pairs...)
 }
 
-// DeleteWithContext will delete an Object from service.
+// DeleteWithContext will delete an object from service.
+//
+// ## Behavior
+//
+// - Delete only delete one and only one object.
+//   - Service DON'T NEED to support remove all.
+//   - User NEED to implement remove_all by themself.
+// - Delete is idempotent.
+//   - Successful delete always return nil error.
+//   - Delete SHOULD never return `ObjectNotExist`
+//   - Delete DON'T NEED to check the object exist or not.
 func (s *Storage) DeleteWithContext(ctx context.Context, path string, pairs ...Pair) (err error) {
 	defer func() {
 		err = s.formatError("delete", err, path)
@@ -1020,6 +1063,12 @@ func (s *Storage) ReadWithContext(ctx context.Context, path string, w io.Writer,
 
 // Stat will stat a path to get info of an object.
 //
+// ## Behavior
+//
+// - Stat SHOULD accept ObjectMode pair as hints.
+//   - Service COULD have different implementations for different object mode.
+//   - Service SHOULD check if returning ObjectMode is match
+//
 // This function will create a context by default.
 func (s *Storage) Stat(path string, pairs ...Pair) (o *Object, err error) {
 	ctx := context.Background()
@@ -1027,6 +1076,12 @@ func (s *Storage) Stat(path string, pairs ...Pair) (o *Object, err error) {
 }
 
 // StatWithContext will stat a path to get info of an object.
+//
+// ## Behavior
+//
+// - Stat SHOULD accept ObjectMode pair as hints.
+//   - Service COULD have different implementations for different object mode.
+//   - Service SHOULD check if returning ObjectMode is match
 func (s *Storage) StatWithContext(ctx context.Context, path string, pairs ...Pair) (o *Object, err error) {
 	defer func() {
 		err = s.formatError("stat", err, path)
