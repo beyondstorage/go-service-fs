@@ -20,3 +20,10 @@ func TestAppend(t *testing.T) {
 	}
 	tests.TestAppender(t, setupTest(t))
 }
+
+func TestDir(t *testing.T) {
+	if os.Getenv("STORAGE_FS_INTEGRATION_TEST") != "on" {
+		t.Skipf("STORAGE_FS_INTEGRATION_TEST is not 'on', skipped")
+	}
+	tests.TestDirer(t, setupTest(t))
+}
