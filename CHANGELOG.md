@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v3.1.1] - 2021-06-28
+
+### Upgraded
+
+- build(deps): Bump go-storage to 4.2.0 (#48)
+
 ## [v3.1.0] - 2021-06-11
 
 ### Added
@@ -57,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Implement fs services.
 
+[v3.1.1]: https://github.com/beyondstorage/go-service-fs/compare/v3.1.0...v3.1.1
 [v3.1.0]: https://github.com/beyondstorage/go-service-fs/compare/v3.0.0...v3.1.0
 [v3.0.0]: https://github.com/beyondstorage/go-service-fs/compare/v2.1.0...v3.0.0
 [v2.1.0]: https://github.com/beyondstorage/go-service-fs/compare/v2.0.0...v2.1.0
