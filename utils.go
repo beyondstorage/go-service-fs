@@ -3,9 +3,11 @@ package fs
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/beyondstorage/go-storage/v4/pkg/httpclient"
 	"github.com/beyondstorage/go-storage/v4/services"
@@ -84,6 +86,12 @@ func newStorager(pairs ...typ.Pair) (store *Storage, err error) {
 func formatError(err error) error {
 	if _, ok := err.(services.InternalError); ok {
 		return err
+	}
+
+	if pe, ok := err.(*fs.PathError); ok {
+		if errno, ok := pe.Err.(syscall.Errno); ok && errno == syscall.EISDIR {
+			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
+		}
 	}
 
 	// Handle error returned by os package.
