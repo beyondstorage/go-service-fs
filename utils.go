@@ -3,15 +3,13 @@ package fs
 import (
 	"errors"
 	"fmt"
+	"github.com/beyondstorage/go-storage/v4/pkg/httpclient"
+	"github.com/beyondstorage/go-storage/v4/services"
+	typ "github.com/beyondstorage/go-storage/v4/types"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
-
-	"github.com/beyondstorage/go-storage/v4/pkg/httpclient"
-	"github.com/beyondstorage/go-storage/v4/services"
-	typ "github.com/beyondstorage/go-storage/v4/types"
 )
 
 const (
@@ -90,31 +88,6 @@ func formatError(err error) error {
 
 	log.Printf("got error: %#+v", err)
 
-	// Handle path & link errors.
-	switch ie := err.(type) {
-	case *os.PathError:
-		switch ie.Err {
-		case syscall.EISDIR:
-			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
-		}
-	case *os.LinkError:
-		log.Printf("got link error: %s", ie.Unwrap())
-		switch ie.Err {
-		// Golang will return syscall.EEXIST when move dst is dir on unix
-		//
-		// ref: https://golang.org/src/os/file_unix.go#38
-		//
-		// FIXME: maybe we need to move this part into utils_unix.go instead?
-		case syscall.EEXIST:
-			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
-		// Golang will return syscall.EAFNOSUPPORT when move dst is dir on windows
-		//
-		// FIXME: maybe we need to move this part into utils_windows.go instead?
-		case syscall.EAFNOSUPPORT:
-			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
-		}
-	}
-
 	// Handle error returned by os package.
 	switch {
 	case errors.Is(err, os.ErrNotExist):
@@ -149,23 +122,45 @@ func (s *Storage) openFile(absPath string, mode int) (f *os.File, needClose bool
 func (s *Storage) createFile(absPath string) (f *os.File, needClose bool, err error) {
 	switch absPath {
 	case Stdin:
-		f = os.Stdin
+		return os.Stdin, false, nil
 	case Stdout:
-		f = os.Stdout
+		return os.Stdout, false, nil
 	case Stderr:
-		f = os.Stderr
-	default:
-		// Create dir before create file
+		return os.Stderr, false, nil
+	}
+
+	fi, err := os.Lstat(absPath)
+	if err == nil {
+		// File is exist, let's check if the file is a dir.
+		// FIXME: maybe we need to handle symlink here?
+		if fi.IsDir() {
+			return nil, false, services.ErrObjectModeInvalid
+		}
+	}
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		// Something error other than ErrNotExist happened, return directly.
+		return
+	}
+	// Set stat error to nil.
+	err = nil
+
+	// The file is not exist, we should create the dir and create the file.
+	if fi == nil {
 		err = os.MkdirAll(filepath.Dir(absPath), 0755)
 		if err != nil {
 			return nil, false, err
 		}
-
-		needClose = true
-		f, err = os.Create(absPath)
 	}
 
-	return
+	// There are two situations we handled here:
+	// - The file is exist and not a dir
+	// - The file is not exist
+	// It's OK to open them with O_CREATE|O_TRUNC.
+	f, err = os.Create(absPath)
+	if err != nil {
+		return nil, false, err
+	}
+	return f, true, nil
 }
 
 func (s *Storage) statFile(absPath string) (fi os.FileInfo, err error) {
