@@ -87,8 +87,10 @@ func formatError(err error) error {
 		return err
 	}
 
+	// Handle path errors.
 	if pe, ok := err.(*os.PathError); ok {
-		if errno, ok := pe.Err.(syscall.Errno); ok && errno == syscall.EISDIR {
+		switch pe.Err {
+		case syscall.EISDIR:
 			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
 		}
 	}
