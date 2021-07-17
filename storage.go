@@ -65,10 +65,12 @@ func (s *Storage) copy(ctx context.Context, src string, dst string, opt pairStor
 
 	dstFile, needClose, err := s.createFile(rd)
 	if err != nil {
-		if errors.Is(err, services.ErrObjectModeInvalid) {
-			err = services.ObjectModeInvalidError{
-				Expected: ModeRead,
-				Actual:   ModeDir,
+		if pe, ok := err.(*os.PathError); ok {
+			if pe.Path == rd && pe.Err.Error() == pathErrIsDir {
+				err = services.ObjectModeInvalidError{
+					Expected: ModeRead,
+					Actual:   ModeDir,
+				}
 			}
 		}
 		return err

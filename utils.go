@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 
 	"github.com/beyondstorage/go-storage/v4/pkg/httpclient"
 	"github.com/beyondstorage/go-storage/v4/services"
@@ -87,12 +86,6 @@ func formatError(err error) error {
 		return err
 	}
 
-	if pe, ok := err.(*os.PathError); ok {
-		if errno, ok := pe.Err.(syscall.Errno); ok && errno == syscall.EISDIR {
-			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
-		}
-	}
-
 	// Handle error returned by os package.
 	switch {
 	case errors.Is(err, os.ErrNotExist):
@@ -133,10 +126,6 @@ func (s *Storage) createFile(absPath string) (f *os.File, needClose bool, err er
 	case Stderr:
 		f = os.Stderr
 	default:
-		defer func() {
-			err = s.formatError("create_file", err, absPath)
-		}()
-
 		// Create dir before create file
 		err = os.MkdirAll(filepath.Dir(absPath), 0755)
 		if err != nil {
@@ -212,3 +201,8 @@ func (s *Storage) convertWriteStorageClass(v string) (string, bool) {
 func convertNewHTTPClientOptions(_ *httpclient.Options) (*httpclient.Options, bool) {
 	return nil, false
 }
+
+const (
+	// pathErrIsDir is the os.PathError message specifies the path is a directory
+	pathErrIsDir = "is a directory"
+)
