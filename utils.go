@@ -126,6 +126,10 @@ func (s *Storage) createFile(absPath string) (f *os.File, needClose bool, err er
 	case Stderr:
 		f = os.Stderr
 	default:
+		defer func() {
+			err = s.formatError("create_file", err, absPath)
+		}()
+
 		// Create dir before create file
 		err = os.MkdirAll(filepath.Dir(absPath), 0755)
 		if err != nil {
@@ -201,8 +205,3 @@ func (s *Storage) convertWriteStorageClass(v string) (string, bool) {
 func convertNewHTTPClientOptions(_ *httpclient.Options) (*httpclient.Options, bool) {
 	return nil, false
 }
-
-const (
-	// pathErrIsDir is the os.PathError message specifies the path is a directory
-	pathErrIsDir = "is a directory"
-)
