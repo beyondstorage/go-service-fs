@@ -99,7 +99,11 @@ func formatError(err error) error {
 		}
 	case *os.LinkError:
 		switch ie.Err {
-		case syscall.EISDIR:
+		// Golang will return syscall.EEXIST which dst is dir
+		// ref: https://golang.org/src/os/file_unix.go#38
+		//
+		// FIXME: maybe we need to move this part into utils_unix.go instead?
+		case syscall.EEXIST:
 			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
 		}
 	}
