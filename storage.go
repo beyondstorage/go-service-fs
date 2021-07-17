@@ -12,7 +12,6 @@ import (
 	"github.com/qingstor/go-mime"
 
 	"github.com/beyondstorage/go-storage/v4/pkg/iowrap"
-	"github.com/beyondstorage/go-storage/v4/services"
 	. "github.com/beyondstorage/go-storage/v4/types"
 )
 
@@ -197,12 +196,6 @@ func (s *Storage) move(ctx context.Context, src string, dst string, opt pairStor
 
 	err = os.Rename(rs, rd)
 	if err != nil {
-		if errors.Is(err, os.ErrExist) {
-			err = services.ObjectModeInvalidError{
-				Expected: ModeRead,
-				Actual:   ModeDir,
-			}
-		}
 		return err
 	}
 	return

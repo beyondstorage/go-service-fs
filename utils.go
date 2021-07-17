@@ -88,11 +88,18 @@ func formatError(err error) error {
 		return err
 	}
 
-	// Handle path errors.
-	if pe, ok := err.(*os.PathError); ok {
-		log.Printf("got error: %#+v, message: %v", pe, pe.Err)
-		switch pe.Err {
-		case syscall.EISDIR, syscall.EADDRINUSE:
+	log.Printf("got error: %#+v", err)
+
+	// Handle path & link errors.
+	switch ie := err.(type) {
+	case *os.PathError:
+		switch ie.Err {
+		case syscall.EISDIR:
+			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
+		}
+	case *os.LinkError:
+		switch ie.Err {
+		case syscall.EISDIR:
 			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
 		}
 	}
