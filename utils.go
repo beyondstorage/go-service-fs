@@ -3,7 +3,6 @@ package fs
 import (
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -88,7 +87,7 @@ func formatError(err error) error {
 		return err
 	}
 
-	if pe, ok := err.(*fs.PathError); ok {
+	if pe, ok := err.(*os.PathError); ok {
 		if errno, ok := pe.Err.(syscall.Errno); ok && errno == syscall.EISDIR {
 			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
 		}
