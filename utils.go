@@ -98,12 +98,19 @@ func formatError(err error) error {
 			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
 		}
 	case *os.LinkError:
+		log.Printf("got link error: %s", ie.Unwrap())
 		switch ie.Err {
-		// Golang will return syscall.EEXIST which dst is dir
+		// Golang will return syscall.EEXIST when move dst is dir on unix
+		//
 		// ref: https://golang.org/src/os/file_unix.go#38
 		//
 		// FIXME: maybe we need to move this part into utils_unix.go instead?
 		case syscall.EEXIST:
+			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
+		// Golang will return syscall.EAFNOSUPPORT when move dst is dir on windows
+		//
+		// FIXME: maybe we need to move this part into utils_windows.go instead?
+		case syscall.EAFNOSUPPORT:
 			return fmt.Errorf("%w: %v", services.ErrObjectModeInvalid, err)
 		}
 	}
