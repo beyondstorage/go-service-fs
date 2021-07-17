@@ -65,12 +65,6 @@ func (s *Storage) copy(ctx context.Context, src string, dst string, opt pairStor
 
 	dstFile, needClose, err := s.createFile(rd)
 	if err != nil {
-		if errors.Is(err, services.ErrObjectModeInvalid) {
-			err = services.ObjectModeInvalidError{
-				Expected: ModeRead,
-				Actual:   ModeDir,
-			}
-		}
 		return err
 	}
 	if needClose {
