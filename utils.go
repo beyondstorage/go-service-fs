@@ -137,10 +137,6 @@ func (s *Storage) createFile(absPath string) (f *os.File, needClose bool, err er
 	case Stderr:
 		f = os.Stderr
 	default:
-		defer func() {
-			err = s.formatError("create_file", err, absPath)
-		}()
-
 		// Create dir before create file
 		err = os.MkdirAll(filepath.Dir(absPath), 0755)
 		if err != nil {
