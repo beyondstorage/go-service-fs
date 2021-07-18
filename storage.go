@@ -109,6 +109,7 @@ func (s *Storage) createAppend(ctx context.Context, path string, opt pairStorage
 	o.ID = rp
 	o.Path = path
 	o.Mode = ModeRead | ModeAppend
+	o.SetAppendOffset(0)
 
 	return o, nil
 }
