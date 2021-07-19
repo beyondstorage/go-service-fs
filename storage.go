@@ -12,6 +12,7 @@ import (
 	"github.com/qingstor/go-mime"
 
 	"github.com/beyondstorage/go-storage/v4/pkg/iowrap"
+	"github.com/beyondstorage/go-storage/v4/services"
 	. "github.com/beyondstorage/go-storage/v4/types"
 )
 
@@ -187,11 +188,27 @@ func (s *Storage) move(ctx context.Context, src string, dst string, opt pairStor
 	rs := s.getAbsPath(src)
 	rd := s.getAbsPath(dst)
 
-	// Create dir for dst path.
-	// Create dir before create file
-	err = os.MkdirAll(filepath.Dir(rd), 0755)
-	if err != nil {
-		return err
+	fi, err := os.Lstat(rd)
+	if err == nil {
+		// File is exist, let's check if the file is a dir.
+		// FIXME: maybe we need to handle symlink here?
+		if fi.IsDir() {
+			return services.ErrObjectModeInvalid
+		}
+	}
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		// Something error other than ErrNotExist happened, return directly.
+		return
+	}
+	// Set stat error to nil.
+	err = nil
+
+	// The file is not exist, we should create the dir and create the file.
+	if fi == nil {
+		err = os.MkdirAll(filepath.Dir(rd), 0755)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = os.Rename(rs, rd)

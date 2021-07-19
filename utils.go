@@ -120,27 +120,45 @@ func (s *Storage) openFile(absPath string, mode int) (f *os.File, needClose bool
 func (s *Storage) createFile(absPath string) (f *os.File, needClose bool, err error) {
 	switch absPath {
 	case Stdin:
-		f = os.Stdin
+		return os.Stdin, false, nil
 	case Stdout:
-		f = os.Stdout
+		return os.Stdout, false, nil
 	case Stderr:
-		f = os.Stderr
-	default:
-		defer func() {
-			err = s.formatError("create_file", err, absPath)
-		}()
+		return os.Stderr, false, nil
+	}
 
-		// Create dir before create file
+	fi, err := os.Lstat(absPath)
+	if err == nil {
+		// File is exist, let's check if the file is a dir.
+		// FIXME: maybe we need to handle symlink here?
+		if fi.IsDir() {
+			return nil, false, services.ErrObjectModeInvalid
+		}
+	}
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		// Something error other than ErrNotExist happened, return directly.
+		return
+	}
+	// Set stat error to nil.
+	err = nil
+
+	// The file is not exist, we should create the dir and create the file.
+	if fi == nil {
 		err = os.MkdirAll(filepath.Dir(absPath), 0755)
 		if err != nil {
 			return nil, false, err
 		}
-
-		needClose = true
-		f, err = os.Create(absPath)
 	}
 
-	return
+	// There are two situations we handled here:
+	// - The file is exist and not a dir
+	// - The file is not exist
+	// It's OK to open them with O_CREATE|O_TRUNC.
+	f, err = os.Create(absPath)
+	if err != nil {
+		return nil, false, err
+	}
+	return f, true, nil
 }
 
 func (s *Storage) statFile(absPath string) (fi os.FileInfo, err error) {
