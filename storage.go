@@ -190,9 +190,8 @@ func (s *Storage) move(ctx context.Context, src string, dst string, opt pairStor
 
 	fi, err := os.Lstat(rd)
 	if err == nil {
-		// File is exist, let's check if the file is a dir.
-		// FIXME: maybe we need to handle symlink here?
-		if fi.IsDir() {
+		// File is exist, let's check if the file is a dir or a symlink.
+		if fi.IsDir() || fi.Mode()&os.ModeSymlink != 0 {
 			return services.ErrObjectModeInvalid
 		}
 	}
