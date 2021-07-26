@@ -318,7 +318,7 @@ func (s *Storage) write(ctx context.Context, path string, r io.Reader, size int6
 }
 
 func (s *Storage) writeAppend(ctx context.Context, o *Object, r io.Reader, size int64, opt pairStorageWriteAppend) (n int64, err error) {
-	f, needClose, err := s.createFile(o.ID)
+	f, needClose, err := s.createFileWithFlag(o.ID, os.O_RDWR|os.O_CREATE|os.O_APPEND)
 	if err != nil {
 		return
 	}
