@@ -118,6 +118,10 @@ func (s *Storage) openFile(absPath string, mode int) (f *os.File, needClose bool
 }
 
 func (s *Storage) createFile(absPath string) (f *os.File, needClose bool, err error) {
+	return s.createFileWithFlag(absPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC)
+}
+
+func (s *Storage) createFileWithFlag(absPath string, flag int) (f *os.File, needClose bool, err error) {
 	switch absPath {
 	case Stdin:
 		return os.Stdin, false, nil
@@ -152,8 +156,7 @@ func (s *Storage) createFile(absPath string) (f *os.File, needClose bool, err er
 	// There are two situations we handled here:
 	// - The file is exist and not a dir
 	// - The file is not exist
-	// It's OK to open them with O_CREATE|O_TRUNC.
-	f, err = os.Create(absPath)
+	f, err = os.OpenFile(absPath, flag, 0666)
 	if err != nil {
 		return nil, false, err
 	}
