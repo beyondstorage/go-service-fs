@@ -23,5 +23,5 @@ jobs:
 
       - name: Test
         env:
-          STORAGE_FS_INTEGRATION_TEST: ${{ secrets.STORAGE_INTEGRATION_TEST }}
+          STORAGE_FS_INTEGRATION_TEST: on
         run: make integration_test
