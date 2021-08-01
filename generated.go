@@ -4,17 +4,17 @@ package fs
 import (
 	"context"
 	"io"
+	"time"
 
-	"github.com/beyondstorage/go-storage/v4/pkg/credential"
 	"github.com/beyondstorage/go-storage/v4/pkg/httpclient"
 	"github.com/beyondstorage/go-storage/v4/services"
 	. "github.com/beyondstorage/go-storage/v4/types"
 )
 
-var _ credential.Provider
 var _ Storager
 var _ services.ServiceError
 var _ httpclient.Options
+var _ time.Duration
 
 // Type is the type for fs
 const Type = "fs"
@@ -92,7 +92,7 @@ var pairMap = map[string]string{
 	"credential":            "string",
 	"default_storage_pairs": "DefaultStoragePairs",
 	"endpoint":              "string",
-	"expire":                "int",
+	"expire":                "time.Duration",
 	"http_client_options":   "*httpclient.Options",
 	"interceptor":           "Interceptor",
 	"io_callback":           "func([]byte)",
