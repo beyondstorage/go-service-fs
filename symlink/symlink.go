@@ -2,7 +2,6 @@ package symlink
 
 import (
 	"errors"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -123,16 +122,13 @@ func walkSymlinks(path string) (string, error) {
 
 		fi, err := os.Lstat(dest)
 		if err != nil {
-			if pe, ok := err.(*os.PathError); ok {
-				switch pe.Err {
-				case syscall.ENOENT:
-					return dest + path[end:], nil
-				}
+			if errors.Is(err, os.ErrNotExist) {
+				return dest + path[end:], nil
 			}
 			return "", err
 		}
 
-		if fi.Mode()&fs.ModeSymlink == 0 {
+		if fi.Mode()&os.ModeSymlink == 0 {
 			if !fi.Mode().IsDir() && end < len(path) {
 				return "", syscall.ENOTDIR
 			}
