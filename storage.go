@@ -130,6 +130,55 @@ func (s *Storage) createDir(ctx context.Context, path string, opt pairStorageCre
 	return
 }
 
+func (s *Storage) createLink(ctx context.Context, path string, target string, opt pairStorageCreateLink) (o *Object, err error) {
+	rt := s.getAbsPath(target)
+	rp := s.getAbsPath(path)
+
+	fi, err := os.Lstat(rp)
+	if err == nil {
+		// File exists. If the file is a symlink, then we remove it.
+		if fi.Mode()&os.ModeSymlink != 0 {
+			err = os.Remove(rp)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			// File exists, but is not a symlink.
+			return nil, services.ErrObjectModeInvalid
+		}
+	}
+
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		// Something error other than ErrNotExist happened, return directly.
+		return nil, err
+	}
+
+	// Set stat error to nil
+	err = nil
+
+	// The file is not exist, we should create the dir and create the file
+	if fi == nil {
+		err = os.MkdirAll(filepath.Dir(rp), 0755)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	o = s.newObject(true)
+	o.ID = rp
+	o.Path = path
+	o.SetLinkTarget(rt)
+
+	o.Mode |= ModeLink
+
+	err = os.Symlink(rt, rp)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
 func (s *Storage) fetch(ctx context.Context, path string, url string, opt pairStorageFetch) (err error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -287,7 +336,9 @@ func (s *Storage) stat(ctx context.Context, path string, opt pairStorageStat) (o
 	if fi.Mode()&os.ModeSymlink != 0 {
 		o.Mode |= ModeLink
 
-		target, err := filepath.EvalSymlinks(rp)
+		// FIXME: `filepath.EvalSymlinks(rp)` can't get the target exactly when target is not a exists file,
+		// so we have temporarily used os.ReadLink instead.
+		target, err := os.Readlink(rp)
 		if err != nil {
 			return nil, err
 		}

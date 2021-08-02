@@ -35,6 +35,7 @@ type Storage struct {
 	typ.UnimplementedFetcher
 	typ.UnimplementedAppender
 	typ.UnimplementedDirer
+	typ.UnimplementedLinker
 }
 
 // String implements Storager.String

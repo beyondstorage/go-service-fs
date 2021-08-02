@@ -41,3 +41,10 @@ func TestMove(t *testing.T) {
 	}
 	tests.TestMover(t, setupTest(t))
 }
+
+func TestLinker(t *testing.T) {
+	if os.Getenv("STORAGE_FS_INTEGRATION_TEST") != "on" {
+		t.Skipf("STORAGE_FS_INTEGRATION_TEST is not 'on', skipped")
+	}
+	tests.TestLinker(t, setupTest(t))
+}
