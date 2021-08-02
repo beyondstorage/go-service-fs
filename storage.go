@@ -335,8 +335,7 @@ func (s *Storage) stat(ctx context.Context, path string, opt pairStorageStat) (o
 	// Check if this file is a link.
 	if fi.Mode()&os.ModeSymlink != 0 {
 		o.Mode |= ModeLink
-
-		//target, err := filepath.EvalSymlinks(rp)
+		
 		// FIXME
 		target, err := os.Readlink(rp)
 		if err != nil {
