@@ -1,6 +1,8 @@
 package fs
 
 import (
+	"errors"
+	"os"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -80,6 +82,9 @@ func toNorm(path string, normBase func(string) (string, error)) (string, error) 
 
 		name, err := normBase(volume + path)
 		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				return volume + path, nil
+			}
 			return "", err
 		}
 
