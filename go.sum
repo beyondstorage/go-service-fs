@@ -1,7 +1,7 @@
 github.com/Xuanwo/templateutils v0.1.0 h1:WpkWOqQtIQ2vAIpJLa727DdN8WtxhUkkbDGa6UhntJY=
 github.com/Xuanwo/templateutils v0.1.0/go.mod h1:OdE0DJ+CJxDBq6psX5DPV+gOZi8bhuHuVUpPCG++Wb8=
-github.com/beyondstorage/go-integration-test/v4 v4.2.1-0.20210728064741-17203b58d96c h1:bYh9zp/ZFg6fLdAL2vpO+JMX8aOCWQzA4jEeG4OZr1w=
-github.com/beyondstorage/go-integration-test/v4 v4.2.1-0.20210728064741-17203b58d96c/go.mod h1:HKgzemQZpxoHBL49JYEUnLTb5eteUhzcvmmPL7EDT/Y=
+github.com/beyondstorage/go-integration-test/v4 v4.3.0 h1:WZ95f78RKlHpvft8zHcMaoa2aaTF/jzlzINhMD0EMHY=
+github.com/beyondstorage/go-integration-test/v4 v4.3.0/go.mod h1:HKgzemQZpxoHBL49JYEUnLTb5eteUhzcvmmPL7EDT/Y=
 github.com/beyondstorage/go-storage/v4 v4.4.0/go.mod h1:mc9VzBImjXDg1/1sLfta2MJH79elfM6m47ZZvZ+q/Uw=
 github.com/beyondstorage/go-storage/v4 v4.4.1-0.20210730075750-6e541b87ea46 h1:sUmtn3cWgpjetIv/lSzZ6AA9GnzvxPjalTvRY1ZDzOg=
 github.com/beyondstorage/go-storage/v4 v4.4.1-0.20210730075750-6e541b87ea46/go.mod h1:mc9VzBImjXDg1/1sLfta2MJH79elfM6m47ZZvZ+q/Uw=

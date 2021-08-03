@@ -33,6 +33,7 @@ func TestCopy(t *testing.T) {
 		t.Skipf("STORAGE_FS_INTEGRATION_TEST is not 'on', skipped")
 	}
 	tests.TestCopier(t, setupTest(t))
+	tests.TestCopierWithDir(t, setupTest(t))
 }
 
 func TestMove(t *testing.T) {
@@ -40,6 +41,7 @@ func TestMove(t *testing.T) {
 		t.Skipf("STORAGE_FS_INTEGRATION_TEST is not 'on', skipped")
 	}
 	tests.TestMover(t, setupTest(t))
+	tests.TestMoverWithDir(t, setupTest(t))
 }
 
 func TestLinker(t *testing.T) {
