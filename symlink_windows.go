@@ -1,4 +1,4 @@
-package symlink
+package fs
 
 import (
 	"path/filepath"
@@ -103,7 +103,7 @@ func toNorm(path string, normBase func(string) (string, error)) (string, error) 
 	return volume + normPath, nil
 }
 
-func evalSymlinks(path string) (string, error) {
+func evalSymlink(path string) (string, error) {
 	newpath, err := walkSymlinks(path)
 	if err != nil {
 		return "", err

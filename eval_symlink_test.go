@@ -1,4 +1,4 @@
-package symlink
+package fs
 
 import (
 	"os"
@@ -50,7 +50,7 @@ func TestEvalSymlinks(t *testing.T) {
 				}
 			}
 
-			actualTarget, err := EvalSymlinks(tt.path)
+			actualTarget, err := evalSymlinks(tt.path)
 			if err != nil {
 				t.Log(err.Error())
 			}

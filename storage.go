@@ -11,7 +11,6 @@ import (
 
 	"github.com/qingstor/go-mime"
 
-	"github.com/beyondstorage/go-service-fs/v3/symlink"
 	"github.com/beyondstorage/go-storage/v4/pkg/iowrap"
 	"github.com/beyondstorage/go-storage/v4/services"
 	. "github.com/beyondstorage/go-storage/v4/types"
@@ -337,7 +336,7 @@ func (s *Storage) stat(ctx context.Context, path string, opt pairStorageStat) (o
 	if fi.Mode()&os.ModeSymlink != 0 {
 		o.Mode |= ModeLink
 
-		target, err := symlink.EvalSymlinks(rp)
+		target, err := evalSymlinks(rp)
 		if err != nil {
 			return nil, err
 		}
