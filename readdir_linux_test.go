@@ -1,15 +1,15 @@
 package fs
 
 import (
-	ps "github.com/beyondstorage/go-storage/v4/pairs"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"path"
 	"testing"
 
+	ps "github.com/beyondstorage/go-storage/v4/pairs"
 	"github.com/beyondstorage/go-storage/v4/types"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -53,10 +53,18 @@ func TestGetFilesFs(t *testing.T) {
 	}
 }
 
+func TestIssue68(t *testing.T) {
+	// There are fuzzy logic in testIssue68.
+	// Run it 100 times to make sure everything is ok.
+	for i := 0; i < 100; i++ {
+		testIssue68(t)
+	}
+}
+
 // This test case intends to reproduce issue #68.
 //
 // ref: https://github.com/beyondstorage/go-service-fs/issues/68
-func TestIssue68(t *testing.T) {
+func testIssue68(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	store, err := newStorager(ps.WithWorkDir(tmpDir))
