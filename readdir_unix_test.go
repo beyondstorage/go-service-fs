@@ -4,6 +4,7 @@
 package fs
 
 import (
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -60,25 +61,25 @@ func TestIssue68(t *testing.T) {
 	// There are fuzzy logic in testIssue68.
 	// Run it 100 times to make sure everything is ok.
 	for i := 0; i < 100; i++ {
-		testIssue68(t)
+		// We will create upto 1000 files, introduce rand for fuzzing.
+		numbers := 225 + rand.Intn(800)
+
+		t.Run(fmt.Sprintf("list %d files", numbers), func(t *testing.T) {
+			testIssue68(t, numbers)
+		})
 	}
 }
 
 // This test case intends to reproduce issue #68.
 //
 // ref: https://github.com/beyondstorage/go-service-fs/issues/68
-func testIssue68(t *testing.T) {
+func testIssue68(t *testing.T, numbers int) {
 	tmpDir := t.TempDir()
 
 	store, err := newStorager(ps.WithWorkDir(tmpDir))
 	if err != nil {
 		t.Errorf("new storager: %v", err)
 	}
-
-	// We will create upto 1000 files, introduce rand for fuzzing.
-	numbers := 225 + rand.Intn(800)
-
-	t.Logf("this tes case list %d files", numbers)
 
 	// Create enough files in a dir, the file name must be long enough.
 	// So that the total size will bigger than 8196.

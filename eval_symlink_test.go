@@ -11,6 +11,13 @@ import (
 func TestEvalSymlinks(t *testing.T) {
 	tmpDir := t.TempDir()
 	t.Log(tmpDir)
+
+	// Make sure the test base dir is not a symlink.
+	tmpDir, err := filepath.EvalSymlinks(tmpDir)
+	if err != nil {
+		t.Error(err)
+	}
+
 	cases := []struct {
 		name        string
 		path        string
@@ -19,10 +26,38 @@ func TestEvalSymlinks(t *testing.T) {
 		targetExist bool
 		expected    string
 	}{
-		{"symlink point to an existing target", filepath.Join(tmpDir, "lna"), "", filepath.Join(tmpDir, "a"), true, filepath.Join(tmpDir, "a")},
-		{"symlink point to an non-existent target", filepath.Join(tmpDir, "lnb"), "", filepath.Join(tmpDir, "b"), false, filepath.Join(tmpDir, "b")},
-		{"symlink point to another symlink", filepath.Join(tmpDir, "lnd"), filepath.Join(tmpDir, "lnc"), filepath.Join(tmpDir, "c"), false, filepath.Join(tmpDir, "c")},
-		{"symlink point to an relative target", filepath.Join(tmpDir, "lle"), "", tmpDir + "/./e", false, filepath.Join(tmpDir, "e")},
+		{
+			"symlink point to an existing target",
+			filepath.Join(tmpDir, "lna"),
+			"",
+			filepath.Join(tmpDir, "a"),
+			true,
+			filepath.Join(tmpDir, "a"),
+		},
+		{
+			"symlink point to an non-existent target",
+			filepath.Join(tmpDir, "lnb"),
+			"",
+			filepath.Join(tmpDir, "b"),
+			false,
+			filepath.Join(tmpDir, "b"),
+		},
+		{
+			"symlink point to another symlink",
+			filepath.Join(tmpDir, "lnd"),
+			filepath.Join(tmpDir, "lnc"),
+			filepath.Join(tmpDir, "c"),
+			false,
+			filepath.Join(tmpDir, "c"),
+		},
+		{
+			"symlink point to an relative target",
+			filepath.Join(tmpDir, "lle"),
+			"",
+			tmpDir + "/./e",
+			false,
+			filepath.Join(tmpDir, "e"),
+		},
 	}
 
 	for _, tt := range cases {
