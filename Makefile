@@ -33,7 +33,7 @@ build: tidy generate check
 	@go build ./...
 	@echo "ok"
 
-unit_test:
+test:
 	go test -race -coverprofile=coverage.txt -covermode=atomic -v .
 	go tool cover -html="coverage.txt" -o "coverage.html"
 
