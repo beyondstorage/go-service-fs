@@ -1,14 +1,14 @@
+//go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
 package fs
 
 import (
 	"context"
+	"golang.org/x/sys/unix"
 	"os"
 	"path"
 	"path/filepath"
-
-	"golang.org/x/sys/unix"
 
 	typ "github.com/beyondstorage/go-storage/v4/types"
 )
@@ -69,7 +69,9 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 		}
 	}
 
-	n, err := unix.ReadDirent(int(input.f.Fd()), input.buf)
+	// Reset bufp before refill buf.
+	input.bufp = 0
+	n, err := unix.ReadDirent(int(input.f.Fd()), *input.buf)
 	if err != nil {
 		return err
 	}
@@ -77,17 +79,18 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 		return typ.IterateDone
 	}
 
-	buf := input.buf
-	for len(buf) > 0 {
+	for input.bufp < n {
+		// Drain the buffer
+		buf := (*input.buf)[input.bufp:n]
+
 		// Get and check reclen
 		reclen, ok := direntReclen(buf)
 		if !ok || reclen > uint64(len(buf)) {
 			return
 		}
+		input.bufp += int(reclen)
 		// current dirent
 		rec := buf[:reclen]
-		// remaining dirents
-		buf = buf[reclen:]
 
 		// Get and check inode
 		ino, ok := direntIno(rec)
@@ -118,6 +121,7 @@ func (s *Storage) listDirNext(ctx context.Context, page *typ.ObjectPage) (err er
 		if fname == "." || fname == ".." {
 			continue
 		}
+
 		if !input.started {
 			if fname != input.continuationToken {
 				continue

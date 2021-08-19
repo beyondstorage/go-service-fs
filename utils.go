@@ -5,20 +5,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/beyondstorage/go-storage/v4/pkg/httpclient"
 	"github.com/beyondstorage/go-storage/v4/services"
 	typ "github.com/beyondstorage/go-storage/v4/types"
 )
 
+// Std{in/out/err} support
 const (
-	// Std{in/out/err} support
 	Stdin  = "/dev/stdin"
 	Stdout = "/dev/stdout"
 	Stderr = "/dev/stderr"
-
-	PathSeparator = string(filepath.Separator)
 )
 
 // Storage is the fs client.
@@ -191,15 +187,7 @@ func (s *Storage) getAbsPath(path string) string {
 	}
 	absPath := filepath.Join(s.workDir, path)
 
-	// Join will clean the trailing "/", we need to append it back.
-	if strings.HasSuffix(path, PathSeparator) {
-		absPath += PathSeparator
-	}
 	return absPath
-}
-
-func (s *Storage) isDirPath(path string) bool {
-	return strings.HasSuffix(path, PathSeparator)
 }
 
 func (s *Storage) formatError(op string, err error, path ...string) error {
@@ -213,20 +201,4 @@ func (s *Storage) formatError(op string, err error, path ...string) error {
 		Storager: s,
 		Path:     path,
 	}
-}
-
-func (s *Storage) convertWriteContentMd5(v string) (string, bool) {
-	return "", true
-}
-
-func (s *Storage) convertWriteContentType(v string) (string, bool) {
-	return "", true
-}
-
-func (s *Storage) convertWriteStorageClass(v string) (string, bool) {
-	return "", true
-}
-
-func convertNewHTTPClientOptions(_ *httpclient.Options) (*httpclient.Options, bool) {
-	return nil, false
 }

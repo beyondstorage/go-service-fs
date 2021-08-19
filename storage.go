@@ -39,8 +39,9 @@ type listDirInput struct {
 	started           bool
 	continuationToken string
 
-	f   *os.File
-	buf []byte
+	f    *os.File
+	buf  *[]byte
+	bufp int
 }
 
 func (input *listDirInput) ContinuationToken() string {
@@ -210,6 +211,8 @@ func (s *Storage) fetch(ctx context.Context, path string, url string, opt pairSt
 }
 
 func (s *Storage) list(ctx context.Context, path string, opt pairStorageList) (oi *ObjectIterator, err error) {
+	buf := make([]byte, 8192)
+
 	input := listDirInput{
 		// Always keep service original name as rp.
 		rp: s.getAbsPath(path),
@@ -221,7 +224,7 @@ func (s *Storage) list(ctx context.Context, path string, opt pairStorageList) (o
 		started:           !opt.HasContinuationToken,
 		continuationToken: opt.ContinuationToken,
 
-		buf: make([]byte, 8192),
+		buf: &buf,
 	}
 
 	return NewObjectIterator(ctx, s.listDirNext, &input), nil

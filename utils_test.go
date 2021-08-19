@@ -30,7 +30,7 @@ func TestFormatOsError(t *testing.T) {
 		{
 			"not supported error",
 			testErr,
-			testErr,
+			services.ErrUnexpected,
 		},
 	}
 
