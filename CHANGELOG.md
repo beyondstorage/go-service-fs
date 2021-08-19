@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 - Fix writeAppend will truncate data if file exists (#60)
-- fix: Fixed workDir not matching when workDir is a symbolic link (#66
+- fix: Fixed workDir not matching when workDir is a symbolic link (#66)
 - fix: List could return duplicated files on unix platform (#69)
 
 ## [v3.3.0] - 2021-07-21
