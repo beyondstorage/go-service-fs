@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        run: GOOS=js GOARCH=wasm make build
+        run: GOOS=js GOARCH=wasm go build ./...
 
   build_386:
     name: Build 386
@@ -43,7 +43,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        run: GOARCH=386 make build
+        run: GOARCH=386 go build ./...
 
   build_arm:
     name: Build arm
@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        run: GOARCH=arm make build
+        run: GOARCH=arm go build ./...
 
   build_arm64:
     name: Build arm64
@@ -86,4 +86,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        run: GOARCH=arm64 make build
+        run: GOARCH=arm64 go build ./...
