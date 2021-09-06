@@ -12,7 +12,7 @@ jobs:
       dependency-names: ${{ steps.metadata.outputs.dependency-names }}
     steps:
       - name: Dependabot metadata
-        uses: Xuanwo/fetch-metadata@v1.2.1
+        uses: Xuanwo/fetch-metadata@v1.2.2
         id: metadata
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
