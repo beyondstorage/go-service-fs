@@ -4,8 +4,10 @@ package fs
 import (
 	"context"
 	"io"
+	"net/http"
 	"time"
 
+	. "github.com/beyondstorage/go-storage/v4/pairs"
 	"github.com/beyondstorage/go-storage/v4/pkg/httpclient"
 	"github.com/beyondstorage/go-storage/v4/services"
 	. "github.com/beyondstorage/go-storage/v4/types"
@@ -15,6 +17,8 @@ var _ Storager
 var _ services.ServiceError
 var _ httpclient.Options
 var _ time.Duration
+var _ http.Request
+var _ Error
 
 // Type is the type for fs
 const Type = "fs"
@@ -131,6 +135,8 @@ type pairStorageNew struct {
 	StorageFeatures        StorageFeatures
 	HasWorkDir             bool
 	WorkDir                string
+	// Enable features
+	// Default pairs
 }
 
 // parsePairStorageNew will parse Pair slice into *pairStorageNew
@@ -161,8 +167,14 @@ func parsePairStorageNew(opts []Pair) (pairStorageNew, error) {
 			}
 			result.HasWorkDir = true
 			result.WorkDir = v.Value.(string)
+			// Enable features
+			// Default pairs
 		}
 	}
+
+	// Enable features
+
+	// Default pairs
 
 	return result, nil
 }
