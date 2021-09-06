@@ -94,6 +94,8 @@ var pairMap = map[string]string{
 	"context":               "context.Context",
 	"continuation_token":    "string",
 	"credential":            "string",
+	"default_content_type":  "string",
+	"default_io_callback":   "func([]byte)",
 	"default_storage_pairs": "DefaultStoragePairs",
 	"endpoint":              "string",
 	"expire":                "time.Duration",
@@ -137,6 +139,10 @@ type pairStorageNew struct {
 	WorkDir                string
 	// Enable features
 	// Default pairs
+	hasDefaultContentType bool
+	DefaultContentType    string
+	hasDefaultIoCallback  bool
+	DefaultIoCallback     func([]byte)
 }
 
 // parsePairStorageNew will parse Pair slice into *pairStorageNew
@@ -167,14 +173,35 @@ func parsePairStorageNew(opts []Pair) (pairStorageNew, error) {
 			}
 			result.HasWorkDir = true
 			result.WorkDir = v.Value.(string)
-			// Enable features
-			// Default pairs
+		// Enable features
+		// Default pairs
+		case "default_content_type":
+			if result.hasDefaultContentType {
+				continue
+			}
+			result.hasDefaultContentType = true
+			result.DefaultContentType = v.Value.(string)
+		case "default_io_callback":
+			if result.hasDefaultIoCallback {
+				continue
+			}
+			result.hasDefaultIoCallback = true
+			result.DefaultIoCallback = v.Value.(func([]byte))
 		}
 	}
 
 	// Enable features
 
 	// Default pairs
+	if result.hasDefaultContentType {
+		result.HasDefaultStoragePairs = true
+		result.DefaultStoragePairs.Write = append(result.DefaultStoragePairs.Write, WithContentType(result.DefaultContentType))
+	}
+	if result.hasDefaultIoCallback {
+		result.HasDefaultStoragePairs = true
+		result.DefaultStoragePairs.Read = append(result.DefaultStoragePairs.Read, WithIoCallback(result.DefaultIoCallback))
+		result.DefaultStoragePairs.Write = append(result.DefaultStoragePairs.Write, WithIoCallback(result.DefaultIoCallback))
+	}
 
 	return result, nil
 }
