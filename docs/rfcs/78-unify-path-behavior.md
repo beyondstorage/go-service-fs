@@ -1,9 +1,9 @@
 - Author: JinnyYi <github.com/JinnyYi>
 - Start Date: 2021-09-14
-- RFC PR: [beyondstorage/go-service-fs#0](https://github.com/beyondstorage/go-service-fs/issues/0)
+- RFC PR: [beyondstorage/go-service-fs#78](https://github.com/beyondstorage/go-service-fs/issues/78)
 - Tracking Issue: [beyondstorage/go-service-fs#0](https://github.com/beyondstorage/go-storage/issues/0)
 
-# Proposal: Unify Path Behavior
+# RFC-78: Unify Path Behavior
 
 Previous Discussion:
 
