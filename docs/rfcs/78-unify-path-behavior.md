@@ -20,47 +20,61 @@ Currently, the undefined behavior for `work_dir` and path makes our service unab
 
 ## Proposal
 
-### Absolute Path and Relative Path
+### Absolute path and relative path
 
 Service SHOULD support two kinds of path:
 
-- Absolute Path:
+- Absolute path:
     - For Unix, the absolute path starts with `/`.
-    - For Windows, the absolute path starts with a drive letter, or the path separator to represent an absolute path from the root of the current drive.
-- Relative Path:
-    - The relative path is for the working directory `WorkDir`.
+    - For Windows, the absolute path starts with a drive letter, or the directory separator to represent an absolute path from the root of the current drive.
+- Relative path:
+    - The relative path is based on the working directory.
 
-### WorkDir and path
+### Directory separator
 
-`WorkDir` specifies the working directory of the process.
+From user side:
+
+- System-related directory separator SHOULD be allowed. 
+  - When the drive letter is included for Windows, it should be something like `c:\\a\\b`.
 
 From service side:
 
-- `WorkDir` SHOULD be an absolute path.
-  - For Unix, `WorkDir` MUST start with `/`.
-  - For Windows, `WorkDir` with prefix `/` means an absolute path from the root of the current drive. And `WorkDir` starts with drive letter SHOULD be allowed.
+- Service SHOULD translate passed in paths into platform-specific paths at the beginning of operations.
+
+### Implementation
+
+**work_dir**
+
+The pair `work_dir` specifies the working directory of the process.
+
+From service side:
+
+- `work_dir` SHOULD be an absolute path.
+  - For Unix, `work_dir` MUST start with `/`.
+  - For Windows, `work_dir` with prefix `/` means an absolute path from the root of the current drive. And `work_dir` starts with drive letter SHOULD be allowed.
 - The default value is `/`.
-- Service SHOULD set `WorkDir` to the path name after the evaluation of any symbolic links internal.
+- Service SHOULD set `work_dir` to the path name after the evaluation of any symbolic links internal.
 
-`path` is the file or directory path for operations.
+**path**
+
+The field `path` is the file or directory path for operations.
 
 From service side:
 
-- For Unix, `path` could be an absolute path or a relative path.
-- For Windows, `path` could be a relative path for `WorkDir` or an absolute path from the root of the current drive. But absolute path with driver letter SHOULD NOT be allowed.
+- For Unix, `path` could be an absolute path or a relative path based on `work_dir`.
+- For Windows, `path` could be a relative path based on `work_dir` or an absolute path from the root of the current drive like `\Program Files\Custom Utilities\StringFinder.exe`. But absolute path with driver letter SHOULD NOT be allowed.
   
 From user side:
 
 - Users SHOULD follow the file naming of file system.
 
-### Path Separator
+**Object:{Path, ID}**
 
-System-related path separator SHOULD be allowed. When the drive letter is included for Windows, it should be something like `c:\\a\\b`.
+`Object` will be returned by creating/stat/retrieve a file or object to identify the operation object.
 
-From service side:
-
-- Service SHOULD be able to tolerate path separator errors and handle translating things into platform-specific paths internally.
 - For the unique key `Object.ID` in storage, it SHOULD be an absolute path compatible with the target platform.
+  - For Unix, it should be like `/path/to/workdir/hello.txt`.
+  - For Windows, it should be like `c:\\path\\to\\workdir\\hello.txt`.
 - For the file path `Object.Path` in storage, it SHOULD always be separated by slash (`/`).
 
 ## Rationale
@@ -93,4 +107,4 @@ The format for `work_dir` in connection string need to be reconsidered as we can
 
 ## Implementation
 
-Support driver letter and path separator on Windows.
+Support driver letter and directory separator on Windows.
