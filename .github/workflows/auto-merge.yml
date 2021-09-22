@@ -25,7 +25,7 @@ jobs:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
-          go-version: "1.15"
+          go-version: "1.16"
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -42,8 +42,14 @@ jobs:
         with:
           commit_message: Auto build to generate code
 
-      - name: Enable auto-merge for dependabot PRs
+      - name: Auto merge
         run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.ROBOT_GITHUB_TOKEN }}
+
+      - name: Auto approve
+        run: gh pr review "$PR_URL" -a
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.ROBOT_GITHUB_TOKEN }}
