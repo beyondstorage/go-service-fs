@@ -113,6 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Implement fs services.
 
+[v3.5.0]: https://github.com/beyondstorage/go-service-fs/compare/v3.3.0...v3.5.0
 [v3.4.0]: https://github.com/beyondstorage/go-service-fs/compare/v3.3.0...v3.4.0
 [v3.3.0]: https://github.com/beyondstorage/go-service-fs/compare/v3.2.0...v3.3.0
 [v3.2.0]: https://github.com/beyondstorage/go-service-fs/compare/v3.1.0...v3.2.0
