@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 
 - feat: Add cross build support (#72)
+- RFC-78: Unify Path Behavior (#78) 
 
 ### Changed
 
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - ci: Fix file not generated 
 - ci: Upgrade Xuanwo/fetch-metadata
 - ci: Sync github actions (#80)
+- docs: Update README (#76)
 
 ### Fixed
 
