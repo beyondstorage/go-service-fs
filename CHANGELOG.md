@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [v3.5.0] - 2021-09-23
+
+### Added
+
+- feat: Add cross build support (#72)
+- RFC-78: Unify Path Behavior (#78) 
+
+### Changed
+
+- ci: Enable auto merge for dependabot
+- ci: Fix file not generated 
+- ci: Upgrade Xuanwo/fetch-metadata
+- ci: Sync github actions (#80)
+- docs: Update README (#76)
+
+### Fixed
+
+- fix: File not generated
+- fix: Use eavlSymlinks to replace filepath.EvalSymlinks (#84)
+
 ## [v3.4.0] - 2021-08-19
 
 ### Added
@@ -95,6 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Implement fs services.
 
+[v3.5.0]: https://github.com/beyondstorage/go-service-fs/compare/v3.4.0...v3.5.0
 [v3.4.0]: https://github.com/beyondstorage/go-service-fs/compare/v3.3.0...v3.4.0
 [v3.3.0]: https://github.com/beyondstorage/go-service-fs/compare/v3.2.0...v3.3.0
 [v3.2.0]: https://github.com/beyondstorage/go-service-fs/compare/v3.1.0...v3.2.0
