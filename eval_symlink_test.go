@@ -35,7 +35,7 @@ func TestEvalSymlinks(t *testing.T) {
 			filepath.Join(tmpDir, "a"),
 		},
 		{
-			"symlink point to an non-existent target",
+			"symlink point to a non-existent target",
 			filepath.Join(tmpDir, "lnb"),
 			"",
 			filepath.Join(tmpDir, "b"),
@@ -51,7 +51,7 @@ func TestEvalSymlinks(t *testing.T) {
 			filepath.Join(tmpDir, "c"),
 		},
 		{
-			"symlink point to an relative target",
+			"symlink point to a relative target",
 			filepath.Join(tmpDir, "lle"),
 			"",
 			tmpDir + "/./e",
