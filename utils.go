@@ -67,7 +67,7 @@ func newStorager(pairs ...typ.Pair) (store *Storage, err error) {
 		store.features = opt.StorageFeatures
 	}
 	if opt.HasWorkDir {
-		workDir, err := filepath.EvalSymlinks(opt.WorkDir)
+		workDir, err := evalSymlinks(opt.WorkDir)
 		if err != nil {
 			return nil, err
 		}
