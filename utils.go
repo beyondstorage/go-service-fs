@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/beyondstorage/go-storage/v4/services"
 	typ "github.com/beyondstorage/go-storage/v4/types"
@@ -183,7 +185,10 @@ func (s *Storage) statFile(absPath string) (fi os.FileInfo, err error) {
 
 func (s *Storage) getAbsPath(path string) string {
 	if filepath.IsAbs(path) {
-		return path
+		return filepath.FromSlash(path)
+	}
+	if runtime.GOOS == "windows" && strings.HasPrefix(path, "/") {
+		return filepath.FromSlash(path)
 	}
 	absPath := filepath.Join(s.workDir, path)
 
